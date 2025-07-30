@@ -10,6 +10,7 @@ import EvolutionNote from './components/EvolutionNote';
 import PrintableReport from './components/PrintableReport';
 import PostSubmissionDashboard from './components/PostSubmissionDashboard';
 import { generateFolio, generateFolioWithPatientInfo, getFolioStats } from './utils/folioGenerator';
+import EvolutionNotePDF from './components/EvolutionNotePDF';
 
 // --- Helper Components ---
 
@@ -82,66 +83,88 @@ const App: React.FC = () => {
     setIsGeneratingPdf(true);
 
     try {
-        const { default: jsPDF } = await import('jspdf');
-        const { default: html2canvas } = await import('html2canvas');
+        // Verificar si es una nota de evolución
+        if (formType === 'evolucion' || dataForReport.nombre_paciente) {
+            // Usar el componente específico para notas de evolución
+            const element = document.createElement('div');
+            element.style.position = 'absolute';
+            element.style.left = '-9999px';
+            element.style.top = '0';
+            document.body.appendChild(element);
+            
+            ReactDOM.render(
+                <EvolutionNotePDF 
+                    data={dataForReport} 
+                    onComplete={() => {
+                        document.body.removeChild(element);
+                        setIsGeneratingPdf(false);
+                    }}
+                />, 
+                element
+            );
+        } else {
+            // Usar el método original para historias clínicas completas
+            const { default: jsPDF } = await import('jspdf');
+            const { default: html2canvas } = await import('html2canvas');
 
-        const reportElementId = 'printable-report-container';
-        let reportElement = document.getElementById(reportElementId);
-        
-        if (!reportElement) {
-            reportElement = document.createElement('div');
-            reportElement.id = reportElementId;
-            reportElement.style.position = 'absolute';
-            reportElement.style.left = '-9999px';
-            reportElement.style.top = '0';
-            reportElement.style.width = '210mm';
-            reportElement.style.background = 'white';
-            document.body.appendChild(reportElement);
-        }
+            const reportElementId = 'printable-report-container';
+            let reportElement = document.getElementById(reportElementId);
+            
+            if (!reportElement) {
+                reportElement = document.createElement('div');
+                reportElement.id = reportElementId;
+                reportElement.style.position = 'absolute';
+                reportElement.style.left = '-9999px';
+                reportElement.style.top = '0';
+                reportElement.style.width = '210mm';
+                reportElement.style.background = 'white';
+                document.body.appendChild(reportElement);
+            }
 
-        const reportRoot = ReactDOM.createRoot(reportElement);
-        reportRoot.render(<PrintableReport data={dataForReport} formType={formType} key={Date.now()} />);
+            const reportRoot = ReactDOM.createRoot(reportElement);
+            reportRoot.render(<PrintableReport data={dataForReport} formType={formType} key={Date.now()} />);
 
-        await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 500));
 
-        const canvas = await html2canvas(reportElement, {
-            scale: 2,
-            useCORS: true,
-            windowWidth: reportElement.scrollWidth,
-            windowHeight: reportElement.scrollHeight,
-        });
+            const canvas = await html2canvas(reportElement, {
+                scale: 2,
+                useCORS: true,
+                windowWidth: reportElement.scrollWidth,
+                windowHeight: reportElement.scrollHeight,
+            });
 
-        reportRoot.unmount();
-        if(reportElement.parentNode) {
-            reportElement.parentNode.removeChild(reportElement);
-        }
-       
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-        });
+            reportRoot.unmount();
+            if(reportElement.parentNode) {
+                reportElement.parentNode.removeChild(reportElement);
+            }
+           
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+            });
 
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        
-        let heightLeft = pdfHeight;
-        let position = 0;
-        
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pdf.internal.pageSize.getHeight();
-
-        while (heightLeft >= 0) {
-            position = heightLeft === 0 ? 0 : -heightLeft;
-            pdf.addPage();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            
+            let heightLeft = pdfHeight;
+            let position = 0;
+            
             pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
             heightLeft -= pdf.internal.pageSize.getHeight();
-        }
 
-        const patientName = dataForReport.nombre || dataForReport.nombre_nino || 'paciente';
-        pdf.save(`consulta_${patientName.replace(/\s+/g, '_')}_${dataForReport.folio}.pdf`);
+            while (heightLeft >= 0) {
+                position = heightLeft === 0 ? 0 : -heightLeft;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pdf.internal.pageSize.getHeight();
+            }
+
+            const patientName = dataForReport.nombre || dataForReport.nombre_nino || 'paciente';
+            pdf.save(`consulta_${patientName.replace(/\s+/g, '_')}_${dataForReport.folio}.pdf`);
+        }
 
     } catch (err) {
         console.error("Error generating PDF:", err);
