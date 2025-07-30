@@ -1,31 +1,22 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { 
-  Fieldset, Input, TextArea, Select, CheckboxGroup, RadioGroup, 
-  MedicationForm, ProgressSection 
-} from './common/FormComponents';
-import { 
-  MedicalHistory, PediatricHistory, Gender, MaritalStatus, BloodType, 
-  Frequency, StressLevel, EmotionalState, YesNo 
-} from '../types';
-import { Calculator, Heart, Brain, Activity, Utensils, Moon, Users, Baby } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { User, Baby, FileText, Calendar, Phone, Mail, MapPin, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
 interface CompleteFormProps {
-  onSubmit: (data: MedicalHistory | PediatricHistory) => Promise<void>;
+  onSubmit: (data: any) => void;
   isSubmitting: boolean;
   formType: 'adulto' | 'pediatrico';
 }
 
 const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, formType }) => {
   const [currentSection, setCurrentSection] = useState(1);
-  const [formData, setFormData] = useState<Partial<MedicalHistory | PediatricHistory>>({
+  const [formData, setFormData] = useState({
     personalData: {
       fullName: '',
       dateOfBirth: '',
-      age: 0,
-      gender: 'No especificado',
-      maritalStatus: 'Soltero(a)',
+      age: '',
+      gender: '',
+      maritalStatus: '',
       occupation: '',
-      bloodType: 'Desconocido',
       phone: '',
       email: '',
       address: '',
@@ -42,45 +33,51 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
       aggravatingFactors: '',
       relievingFactors: ''
     },
-    presentIllness: {
-      onset: '',
-      course: '',
-      associatedSymptoms: [],
-      previousTreatments: '',
-      responseToTreatment: ''
+    medicalHistory: {
+      presentIllness: '',
+      pastMedicalHistory: '',
+      allergies: '',
+      medications: '',
+      familyHistory: ''
     },
-    pastMedicalHistory: {
-      chronicDiseases: [],
-      surgeries: [],
-      hospitalizations: [],
-      accidents: [],
-      allergies: {
-        medications: [],
-        foods: [],
-        environmental: [],
-        reactions: []
-      },
-      immunizations: {
-        status: 'Unknown',
-        lastUpdate: '',
-        missing: []
-      }
+    systemReview: {
+      cardiovascular: '',
+      respiratory: '',
+      gastrointestinal: '',
+      genitourinary: '',
+      musculoskeletal: '',
+      neurological: '',
+      dermatological: '',
+      psychological: ''
     },
-    familyHistory: {
-      diabetes: false,
-      hypertension: false,
-      heartDisease: false,
-      cancer: false,
-      thyroid: false,
-      obesity: false,
-      mentalHealth: false,
-      allergies: false,
-      other: ''
+    lifestyle: {
+      physicalActivity: '',
+      nutrition: '',
+      sleep: '',
+      mentalHealth: '',
+      toxicHabits: ''
     },
-    medications: {
-      current: [],
-      previous: [],
-      supplements: []
+    vitalSigns: {
+      bloodPressure: '',
+      heartRate: '',
+      respiratoryRate: '',
+      temperature: '',
+      oxygenSaturation: '',
+      weight: '',
+      height: '',
+      bmi: ''
+    },
+    physicalExam: {
+      general: '',
+      head: '',
+      neck: '',
+      chest: '',
+      cardiovascular: '',
+      respiratory: '',
+      abdomen: '',
+      extremities: '',
+      neurological: '',
+      skin: ''
     },
     // Campos específicos para pediatría
     pediatricData: formType === 'pediatrico' ? {
@@ -103,158 +100,38 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
         feedingProblems: ''
       },
       growthHistory: {
-        heightPercentile: '',
-        weightPercentile: '',
+        weightHistory: '',
+        heightHistory: '',
         headCircumference: '',
-        growthProblems: ''
+        percentiles: ''
       }
-    } : undefined,
-    systemReview: {
-      cardiovascular: {
-        chestPain: false,
-        palpitations: false,
-        hypertension: false,
-        edema: false,
-        varicoseVeins: false,
-        other: ''
-      },
-      respiratory: {
-        cough: false,
-        dyspnea: false,
-        wheezing: false,
-        asthma: false,
-        sleepApnea: false,
-        other: ''
-      },
-      gastrointestinal: {
-        nausea: false,
-        vomiting: false,
-        diarrhea: false,
-        constipation: false,
-        abdominalPain: false,
-        heartburn: false,
-        other: ''
-      },
-      other: ''
-    },
-    lifestyle: {
-      physicalActivity: {
-        type: '',
-        frequency: '',
-        duration: '',
-        intensity: '',
-        barriers: '',
-        goals: ''
-      },
-      nutrition: {
-        mealsPerDay: 3,
-        mealTiming: '',
-        dietType: '',
-        waterIntake: '',
-        caffeineIntake: '',
-        alcoholIntake: '',
-        eatingPatterns: '',
-        foodAllergies: [],
-        foodIntolerances: []
-      },
-      sleep: {
-        hoursPerNight: 8,
-        quality: '',
-        problems: [],
-        snoring: false,
-        sleepApnea: false,
-        sleepHygiene: ''
-      },
-      mentalHealth: {
-        stressLevel: '',
-        emotionalState: '',
-        stressSources: [],
-        copingStrategies: [],
-        symptoms: [],
-        supportSystem: '',
-        previousTreatment: ''
-      }
-    },
-    toxicHabits: {
-      smoking: {
-        status: false,
-        quantity: '',
-        duration: '',
-        quitDate: ''
-      },
-      alcohol: {
-        status: false,
-        type: '',
-        frequency: '',
-        quantity: ''
-      },
-      drugs: {
-        status: false,
-        type: '',
-        frequency: '',
-        lastUse: ''
-      }
-    },
-    vitalSigns: {
-      bloodPressure: {
-        systolic: 0,
-        diastolic: 0
-      },
-      heartRate: 0,
-      respiratoryRate: 0,
-      temperature: 0,
-      oxygenSaturation: 0,
-      painScale: 0
-    },
-    anthropometry: {
-      weight: 0,
-      height: 0,
-      bmi: 0,
-      waistCircumference: 0,
-      hipCircumference: 0,
-      waistToHipRatio: 0,
-      targetWeight: 0
-    },
-    physicalExam: {
-      general: '',
-      head: '',
-      neck: '',
-      chest: '',
-      cardiovascular: '',
-      respiratory: '',
-      abdomen: '',
-      extremities: '',
-      neurological: '',
-      skin: ''
-    },
-    folio: '',
-    formType: formType
+    } : null
   });
 
   const sections = formType === 'pediatrico' ? [
-    { id: 1, title: 'Datos Personales', icon: Users },
-    { id: 2, title: 'Datos Perinatales', icon: Baby },
-    { id: 3, title: 'Motivo de Consulta', icon: Heart },
-    { id: 4, title: 'Historia Clínica', icon: Brain },
-    { id: 5, title: 'Desarrollo y Crecimiento', icon: Activity },
-    { id: 6, title: 'Revisión por Sistemas', icon: Activity },
-    { id: 7, title: 'Signos Vitales', icon: Calculator },
-    { id: 8, title: 'Exploración Física', icon: Heart }
+    'Datos Personales',
+    'Datos Perinatales',
+    'Motivo de Consulta',
+    'Historia Clínica',
+    'Desarrollo y Crecimiento',
+    'Revisión por Sistemas',
+    'Signos Vitales',
+    'Exploración Física'
   ] : [
-    { id: 1, title: 'Datos Personales', icon: Users },
-    { id: 2, title: 'Motivo de Consulta', icon: Heart },
-    { id: 3, title: 'Historia Clínica', icon: Brain },
-    { id: 4, title: 'Revisión por Sistemas', icon: Activity },
-    { id: 5, title: 'Estilo de Vida', icon: Utensils },
-    { id: 6, title: 'Signos Vitales', icon: Calculator },
-    { id: 7, title: 'Exploración Física', icon: Heart }
+    'Datos Personales',
+    'Motivo de Consulta',
+    'Historia Clínica',
+    'Revisión por Sistemas',
+    'Estilo de Vida',
+    'Signos Vitales',
+    'Exploración Física'
   ];
 
   const handleInputChange = (section: string, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [section]: {
-        ...prev[section as keyof (MedicalHistory | PediatricHistory)],
+        ...prev[section as keyof typeof prev],
         [field]: value
       }
     }));
@@ -264,37 +141,20 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
     setFormData(prev => ({
       ...prev,
       [section]: {
-        ...prev[section as keyof (MedicalHistory | PediatricHistory)],
+        ...prev[section as keyof typeof prev],
         [subsection]: {
-          ...(prev[section as keyof (MedicalHistory | PediatricHistory)] as any)?.[subsection],
+          ...(prev[section as keyof typeof prev] as any)?.[subsection],
           [field]: value
         }
       }
     }));
   };
 
-  const calculateBMI = useCallback(() => {
-    const weight = formData.anthropometry?.weight;
-    const height = formData.anthropometry?.height;
-    
-    if (weight && height && height > 0) {
-      const heightInMeters = height / 100;
-      const bmi = weight / (heightInMeters * heightInMeters);
-      const waistToHipRatio = formData.anthropometry?.waistCircumference && formData.anthropometry?.hipCircumference 
-        ? formData.anthropometry.waistCircumference / formData.anthropometry.hipCircumference 
-        : 0;
-      
-      handleInputChange('anthropometry', 'bmi', Number(bmi.toFixed(2)));
-      handleInputChange('anthropometry', 'waistToHipRatio', Number(waistToHipRatio.toFixed(2)));
-    }
-  }, [formData.anthropometry?.weight, formData.anthropometry?.height]);
-
   const calculateAge = useCallback((birthDate: string) => {
     if (birthDate && birthDate.trim() !== '') {
       const today = new Date();
       const birth = new Date(birthDate);
       
-      // Verificar que la fecha sea válida
       if (isNaN(birth.getTime())) {
         return;
       }
@@ -306,28 +166,35 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
         age--;
       }
       
-      // Verificar que la edad sea razonable
       if (age >= 0 && age <= 150) {
-        handleInputChange('personalData', 'age', age);
+        handleInputChange('personalData', 'age', age.toString());
       }
     }
   }, []);
 
+  const calculateBMI = useCallback(() => {
+    const weight = parseFloat(formData.vitalSigns.weight);
+    const height = parseFloat(formData.vitalSigns.height);
+    
+    if (weight && height && height > 0) {
+      const heightInMeters = height / 100;
+      const bmi = weight / (heightInMeters * heightInMeters);
+      handleInputChange('vitalSigns', 'bmi', bmi.toFixed(2));
+    }
+  }, [formData.vitalSigns.weight, formData.vitalSigns.height]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar que al menos fecha de nacimiento o edad estén presentes
-    const hasDateOfBirth = formData.personalData?.dateOfBirth && formData.personalData.dateOfBirth.trim() !== '';
-    const hasAge = formData.personalData?.age && formData.personalData.age > 0;
+    const hasDateOfBirth = formData.personalData.dateOfBirth && formData.personalData.dateOfBirth.trim() !== '';
+    const hasAge = formData.personalData.age && formData.personalData.age.trim() !== '';
     
     if (!hasDateOfBirth && !hasAge) {
       alert('Por favor, ingrese al menos la fecha de nacimiento o la edad del paciente.');
       return;
     }
     
-    if (formData as MedicalHistory | PediatricHistory) {
-      onSubmit(formData as MedicalHistory | PediatricHistory);
-    }
+    onSubmit(formData);
   };
 
   const nextSection = () => {
@@ -342,10 +209,6 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
     }
   };
 
-  useEffect(() => {
-    calculateBMI();
-  }, [calculateBMI]);
-
   const renderSection = () => {
     switch (currentSection) {
       case 1:
@@ -356,282 +219,274 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
                 <strong>📅 Información de Edad:</strong> Puede ingresar la fecha de nacimiento exacta (recomendado) o la edad aproximada. 
-                Si ingresa la fecha, la edad se calculará automáticamente. Si no conoce la fecha exacta, puede ingresar solo la edad.
+                Si ingresa la fecha, la edad se calculará automáticamente.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Nombre completo"
-                name="fullName"
-                value={formData.personalData?.fullName}
-                onChange={(e) => handleInputChange('personalData', 'fullName', e.target.value)}
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nombre Completo
+                </label>
+                <input
+                  type="text"
+                  value={formData.personalData.fullName}
+                  onChange={(e) => handleInputChange('personalData', 'fullName', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Nombre y apellidos"
+                  required
+                />
+              </div>
               
-              <Input
-                label="Fecha de nacimiento"
-                name="dateOfBirth"
-                type="date"
-                value={formData.personalData?.dateOfBirth}
-                onChange={(e) => {
-                  const newDate = e.target.value;
-                  handleInputChange('personalData', 'dateOfBirth', newDate);
-                  
-                  if (newDate) {
-                    calculateAge(newDate);
-                  } else {
-                    // Si se borra la fecha, limpiar la edad para permitir entrada manual
-                    handleInputChange('personalData', 'age', 0);
-                  }
-                }}
-                placeholder="Si no se conoce, deje vacío"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha de Nacimiento
+                </label>
+                <input
+                  type="date"
+                  value={formData.personalData.dateOfBirth}
+                  onChange={(e) => {
+                    handleInputChange('personalData', 'dateOfBirth', e.target.value);
+                    calculateAge(e.target.value);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
               
-              <Input
-                label="Edad (años)"
-                name="age"
-                type="number"
-                min="0"
-                max="150"
-                value={formData.personalData?.age}
-                onChange={(e) => handleInputChange('personalData', 'age', parseInt(e.target.value) || 0)}
-                placeholder="Si no se conoce fecha, ingrese edad aproximada"
-                className={formData.personalData?.dateOfBirth ? 'bg-gray-100' : ''}
-                disabled={!!formData.personalData?.dateOfBirth}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Edad
+                </label>
+                <input
+                  type="number"
+                  value={formData.personalData.age}
+                  onChange={(e) => handleInputChange('personalData', 'age', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Edad en años"
+                  min="0"
+                  max="150"
+                  disabled={!!formData.personalData.dateOfBirth}
+                />
+              </div>
               
-              <Select
-                label="Género"
-                name="gender"
-                value={formData.personalData?.gender}
-                onChange={(e) => handleInputChange('personalData', 'gender', e.target.value)}
-                options={[
-                  { value: 'Masculino', label: 'Masculino' },
-                  { value: 'Femenino', label: 'Femenino' },
-                  { value: 'Otro', label: 'Otro' },
-                  { value: 'No especificado', label: 'No especificado' }
-                ]}
-                required
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Género
+                </label>
+                <select
+                  value={formData.personalData.gender}
+                  onChange={(e) => handleInputChange('personalData', 'gender', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Seleccionar género</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
               
               {formType === 'adulto' && (
                 <>
-                  <Select
-                    label="Estado civil"
-                    name="maritalStatus"
-                    value={formData.personalData?.maritalStatus}
-                    onChange={(e) => handleInputChange('personalData', 'maritalStatus', e.target.value)}
-                    options={[
-                      { value: 'Soltero(a)', label: 'Soltero(a)' },
-                      { value: 'Casado(a)', label: 'Casado(a)' },
-                      { value: 'Unión libre', label: 'Unión libre' },
-                      { value: 'Divorciado(a)', label: 'Divorciado(a)' },
-                      { value: 'Viudo(a)', label: 'Viudo(a)' }
-                    ]}
-                    required
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Estado Civil
+                    </label>
+                    <select
+                      value={formData.personalData.maritalStatus}
+                      onChange={(e) => handleInputChange('personalData', 'maritalStatus', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Seleccionar estado civil</option>
+                      <option value="Soltero(a)">Soltero(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="Unión libre">Unión libre</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viudo(a)">Viudo(a)</option>
+                    </select>
+                  </div>
                   
-                  <Input
-                    label="Ocupación"
-                    name="occupation"
-                    value={formData.personalData?.occupation}
-                    onChange={(e) => handleInputChange('personalData', 'occupation', e.target.value)}
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ocupación
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.personalData.occupation}
+                      onChange={(e) => handleInputChange('personalData', 'occupation', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Ocupación o profesión"
+                    />
+                  </div>
                 </>
               )}
               
-              <Select
-                label="Tipo de sangre"
-                name="bloodType"
-                value={formData.personalData?.bloodType}
-                onChange={(e) => handleInputChange('personalData', 'bloodType', e.target.value)}
-                options={[
-                  { value: 'A+', label: 'A+' },
-                  { value: 'A-', label: 'A-' },
-                  { value: 'B+', label: 'B+' },
-                  { value: 'B-', label: 'B-' },
-                  { value: 'AB+', label: 'AB+' },
-                  { value: 'AB-', label: 'AB-' },
-                  { value: 'O+', label: 'O+' },
-                  { value: 'O-', label: 'O-' },
-                  { value: 'Desconocido', label: 'Desconocido' }
-                ]}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Phone className="w-4 h-4 inline mr-1" />
+                  Teléfono
+                </label>
+                <input
+                  type="tel"
+                  value={formData.personalData.phone}
+                  onChange={(e) => handleInputChange('personalData', 'phone', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Número de teléfono"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Mail className="w-4 h-4 inline mr-1" />
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={formData.personalData.email}
+                  onChange={(e) => handleInputChange('personalData', 'email', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Correo electrónico"
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <MapPin className="w-4 h-4 inline mr-1" />
+                  Dirección
+                </label>
+                <input
+                  type="text"
+                  value={formData.personalData.address}
+                  onChange={(e) => handleInputChange('personalData', 'address', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Dirección completa"
+                />
+              </div>
             </div>
             
-            <Fieldset title="Información de Contacto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="Teléfono"
-                  name="phone"
-                  type="tel"
-                  value={formData.personalData?.phone}
-                  onChange={(e) => handleInputChange('personalData', 'phone', e.target.value)}
-                  required
-                />
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Contacto de Emergencia</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.personalData.emergencyContact.name}
+                    onChange={(e) => handleNestedChange('personalData', 'emergencyContact', 'name', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Nombre del contacto"
+                  />
+                </div>
                 
-                <Input
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.personalData?.email}
-                  onChange={(e) => handleInputChange('personalData', 'email', e.target.value)}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Relación
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.personalData.emergencyContact.relationship}
+                    onChange={(e) => handleNestedChange('personalData', 'emergencyContact', 'relationship', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ej: Padre, Madre, Esposo"
+                  />
+                </div>
                 
-                <Input
-                  label="Dirección"
-                  name="address"
-                  value={formData.personalData?.address}
-                  onChange={(e) => handleInputChange('personalData', 'address', e.target.value)}
-                  className="md:col-span-2"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.personalData.emergencyContact.phone}
+                    onChange={(e) => handleNestedChange('personalData', 'emergencyContact', 'phone', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Número de teléfono"
+                  />
+                </div>
               </div>
-            </Fieldset>
-            
-            <Fieldset title="Contacto de Emergencia">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="Nombre del contacto"
-                  name="emergencyName"
-                  value={formData.personalData?.emergencyContact?.name}
-                  onChange={(e) => handleNestedChange('personalData', 'emergencyContact', 'name', e.target.value)}
-                  required
-                />
-                
-                <Input
-                  label="Relación"
-                  name="emergencyRelationship"
-                  value={formData.personalData?.emergencyContact?.relationship}
-                  onChange={(e) => handleNestedChange('personalData', 'emergencyContact', 'relationship', e.target.value)}
-                  required
-                />
-                
-                <Input
-                  label="Teléfono de emergencia"
-                  name="emergencyPhone"
-                  type="tel"
-                  value={formData.personalData?.emergencyContact?.phone}
-                  onChange={(e) => handleNestedChange('personalData', 'emergencyContact', 'phone', e.target.value)}
-                  required
-                />
-              </div>
-            </Fieldset>
+            </div>
           </div>
         );
-        
+
       case 2:
         if (formType === 'pediatrico') {
           return (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">Datos Perinatales</h2>
               
-              <Fieldset title="Información del Nacimiento">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Peso al nacer (kg)"
-                    name="birthWeight"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Peso al Nacer (kg)
+                  </label>
+                  <input
                     type="number"
                     step="0.1"
                     value={formData.pediatricData?.birthWeight}
-                    onChange={(e) => handleNestedChange('pediatricData', 'birthWeight', e.target.value)}
+                    onChange={(e) => handleInputChange('pediatricData', 'birthWeight', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Ej: 3.2"
                   />
-                  
-                  <Input
-                    label="Longitud al nacer (cm)"
-                    name="birthLength"
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Longitud al Nacer (cm)
+                  </label>
+                  <input
                     type="number"
                     step="0.1"
                     value={formData.pediatricData?.birthLength}
-                    onChange={(e) => handleNestedChange('pediatricData', 'birthLength', e.target.value)}
+                    onChange={(e) => handleInputChange('pediatricData', 'birthLength', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Ej: 50.0"
                   />
-                  
-                  <Input
-                    label="Edad gestacional (semanas)"
-                    name="gestationalAge"
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Edad Gestacional (semanas)
+                  </label>
+                  <input
                     type="number"
                     value={formData.pediatricData?.gestationalAge}
-                    onChange={(e) => handleNestedChange('pediatricData', 'gestationalAge', e.target.value)}
+                    onChange={(e) => handleInputChange('pediatricData', 'gestationalAge', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Ej: 40"
                   />
-                  
-                  <Select
-                    label="Tipo de parto"
-                    name="deliveryType"
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tipo de Parto
+                  </label>
+                  <select
                     value={formData.pediatricData?.deliveryType}
-                    onChange={(e) => handleNestedChange('pediatricData', 'deliveryType', e.target.value)}
-                    options={[
-                      { value: 'Vaginal', label: 'Vaginal' },
-                      { value: 'Cesárea', label: 'Cesárea' },
-                      { value: 'Instrumentado', label: 'Instrumentado' },
-                      { value: 'Otro', label: 'Otro' }
-                    ]}
-                  />
+                    onChange={(e) => handleInputChange('pediatricData', 'deliveryType', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Vaginal">Vaginal</option>
+                    <option value="Cesárea">Cesárea</option>
+                    <option value="Instrumentado">Instrumentado</option>
+                    <option value="Otro">Otro</option>
+                  </select>
                 </div>
-                
-                <TextArea
-                  label="Complicaciones del parto"
-                  name="complications"
-                  value={formData.pediatricData?.complications}
-                  onChange={(e) => handleNestedChange('pediatricData', 'complications', e.target.value)}
-                  placeholder="Describa cualquier complicación durante el embarazo o parto"
-                  rows={3}
-                />
-              </Fieldset>
+              </div>
               
-              <Fieldset title="Historia Alimentaria">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.pediatricData?.feedingHistory?.breastfeeding}
-                      onChange={(e) => handleNestedChange('pediatricData', 'feedingHistory', 'breastfeeding', e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Lactancia materna</span>
-                  </label>
-                  
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.pediatricData?.feedingHistory?.formulaFeeding}
-                      onChange={(e) => handleNestedChange('pediatricData', 'feedingHistory', 'formulaFeeding', e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Alimentación con fórmula</span>
-                  </label>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Edad de destete (meses)"
-                    name="weaningAge"
-                    type="number"
-                    value={formData.pediatricData?.feedingHistory?.weaningAge}
-                    onChange={(e) => handleNestedChange('pediatricData', 'feedingHistory', 'weaningAge', e.target.value)}
-                    placeholder="Ej: 6"
-                  />
-                  
-                  <Input
-                    label="Dieta actual"
-                    name="currentDiet"
-                    value={formData.pediatricData?.feedingHistory?.currentDiet}
-                    onChange={(e) => handleNestedChange('pediatricData', 'feedingHistory', 'currentDiet', e.target.value)}
-                    placeholder="Ej: Mixta, sólidos, etc."
-                  />
-                </div>
-                
-                <TextArea
-                  label="Problemas de alimentación"
-                  name="feedingProblems"
-                  value={formData.pediatricData?.feedingHistory?.feedingProblems}
-                  onChange={(e) => handleNestedChange('pediatricData', 'feedingHistory', 'feedingProblems', e.target.value)}
-                  placeholder="Describa cualquier problema de alimentación"
-                  rows={2}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Complicaciones del Parto
+                </label>
+                <textarea
+                  value={formData.pediatricData?.complications}
+                  onChange={(e) => handleInputChange('pediatricData', 'complications', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Describa cualquier complicación durante el embarazo o parto"
                 />
-              </Fieldset>
+              </div>
             </div>
           );
         } else {
@@ -639,100 +494,139 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">Motivo de Consulta</h2>
               
-              <Fieldset title="Información Principal">
-                <div className="space-y-4">
-                  <Input
-                    label="Motivo principal de consulta"
-                    name="reason"
-                    value={formData.chiefComplaint?.reason}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Motivo Principal
+                  </label>
+                  <textarea
+                    value={formData.chiefComplaint.reason}
                     onChange={(e) => handleInputChange('chiefComplaint', 'reason', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
                     placeholder="Describa el motivo principal de la consulta"
                     required
                   />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Input
-                      label="Duración del problema"
-                      name="duration"
-                      value={formData.chiefComplaint?.duration}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Duración
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.chiefComplaint.duration}
                       onChange={(e) => handleInputChange('chiefComplaint', 'duration', e.target.value)}
-                      placeholder="Ej: 3 días, 2 semanas, 1 mes..."
-                    />
-                    
-                    <Select
-                      label="Severidad"
-                      name="severity"
-                      value={formData.chiefComplaint?.severity}
-                      onChange={(e) => handleInputChange('chiefComplaint', 'severity', e.target.value)}
-                      options={[
-                        { value: 'Leve', label: 'Leve' },
-                        { value: 'Moderada', label: 'Moderada' },
-                        { value: 'Severa', label: 'Severa' }
-                      ]}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Ej: 3 días, 2 semanas"
                     />
                   </div>
                   
-                  <TextArea
-                    label="Factores que agravan"
-                    name="aggravatingFactors"
-                    value={formData.chiefComplaint?.aggravatingFactors}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Severidad
+                    </label>
+                    <select
+                      value={formData.chiefComplaint.severity}
+                      onChange={(e) => handleInputChange('chiefComplaint', 'severity', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Leve">Leve</option>
+                      <option value="Moderado">Moderado</option>
+                      <option value="Severo">Severo</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Factores Agravantes
+                  </label>
+                  <textarea
+                    value={formData.chiefComplaint.aggravatingFactors}
                     onChange={(e) => handleInputChange('chiefComplaint', 'aggravatingFactors', e.target.value)}
-                    placeholder="¿Qué hace que el problema empeore?"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows={2}
-                  />
-                  
-                  <TextArea
-                    label="Factores que alivian"
-                    name="relievingFactors"
-                    value={formData.chiefComplaint?.relievingFactors}
-                    onChange={(e) => handleInputChange('chiefComplaint', 'relievingFactors', e.target.value)}
-                    placeholder="¿Qué hace que el problema mejore?"
-                    rows={2}
+                    placeholder="¿Qué empeora los síntomas?"
                   />
                 </div>
-              </Fieldset>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Factores Mejorantes
+                  </label>
+                  <textarea
+                    value={formData.chiefComplaint.relievingFactors}
+                    onChange={(e) => handleInputChange('chiefComplaint', 'relievingFactors', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={2}
+                    placeholder="¿Qué mejora los síntomas?"
+                  />
+                </div>
+              </div>
             </div>
           );
         }
-        
+
       default:
-        return <div>Sección en desarrollo...</div>;
+        return (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-gray-600 mb-4">
+              Sección {currentSection}: {sections[currentSection - 1]}
+            </h3>
+            <p className="text-gray-500">
+              Esta sección está en desarrollo. Próximamente disponible.
+            </p>
+          </div>
+        );
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl mb-6">
+      <div className={`bg-gradient-to-r ${formType === 'adulto' ? 'from-blue-50 to-indigo-50' : 'from-green-50 to-teal-50'} p-6 rounded-xl mb-6`}>
         <div className="flex items-center gap-3 mb-4">
-          <Brain className="w-8 h-8 text-blue-600" />
+          {formType === 'adulto' ? <User className="w-8 h-8 text-blue-600" /> : <Baby className="w-8 h-8 text-green-600" />}
           <h2 className="text-2xl font-bold text-gray-800">
-            Historia Clínica Completa - {formType === 'pediatrico' ? 'Pediátrica' : 'Adulto'}
+            Historia Clínica Completa - {formType === 'adulto' ? 'Adulto' : 'Pediátrica'}
           </h2>
         </div>
         <p className="text-gray-600">
-          Formulario completo para {formType === 'pediatrico' ? 'pacientes pediátricos' : 'pacientes adultos'}.
+          Formulario completo para historia clínica {formType === 'adulto' ? 'de adultos' : 'pediátrica'}.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <ProgressSection
-          currentSection={currentSection}
-          totalSections={sections.length}
-          sections={sections}
-        />
-
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          {renderSection()}
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">
+            Sección {currentSection} de {sections.length}
+          </span>
+          <span className="text-sm text-gray-500">
+            {Math.round((currentSection / sections.length) * 100)}% completado
+          </span>
         </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className={`h-2 rounded-full transition-all duration-300 ${formType === 'adulto' ? 'bg-blue-600' : 'bg-green-600'}`}
+            style={{ width: `${(currentSection / sections.length) * 100}%` }}
+          ></div>
+        </div>
+      </div>
 
-        <div className="flex justify-between">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {renderSection()}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between pt-6">
           <button
             type="button"
             onClick={prevSection}
             disabled={currentSection === 1}
-            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
             Anterior
           </button>
 
@@ -740,26 +634,26 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
             <button
               type="button"
               onClick={nextSection}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors ${formType === 'adulto' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'}`}
             >
               Siguiente
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className={`flex items-center gap-2 px-6 py-2 text-white rounded-lg transition-colors ${formType === 'adulto' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Enviando...
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Guardando...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-5 h-5" />
-                  Enviar Historia Clínica
+                  <CheckCircle className="w-4 h-4" />
+                  Guardar Historia Clínica
                 </>
               )}
             </button>
