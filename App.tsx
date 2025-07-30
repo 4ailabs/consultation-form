@@ -9,6 +9,7 @@ import CompleteForm from './components/CompleteForm';
 import EvolutionNote from './components/EvolutionNote';
 import PrintableReport from './components/PrintableReport';
 import PostSubmissionDashboard from './components/PostSubmissionDashboard';
+import { generateFolio, generateFolioWithPatientInfo, getFolioStats } from './utils/folioGenerator';
 
 // --- Helper Components ---
 
@@ -222,10 +223,33 @@ const App: React.FC = () => {
     setAiAnalysisResult(null);
     const webhookUrl = "https://hook.us1.make.com/9zacarqdqsu906flfdhwodcm8tmxf4tp";
     
-    const currentFolio = `EXP-${folioCounter}`;
-    setFolioCounter(prev => prev + 1);
+    // Generar folio inteligente basado en el tipo de formulario
+    let folioData;
+    if (formData.nombre_paciente && formData.edad) {
+      // Si tenemos información del paciente, usar folio con información
+      folioData = generateFolioWithPatientInfo(
+        formType, 
+        formData.nombre_paciente, 
+        parseInt(formData.edad)
+      );
+    } else if (formData.personalData?.fullName && formData.personalData?.age) {
+      // Para formularios completos
+      folioData = generateFolioWithPatientInfo(
+        formType,
+        formData.personalData.fullName,
+        formData.personalData.age
+      );
+    } else {
+      // Folio básico
+      folioData = generateFolio(formType);
+    }
 
-    const dataWithFolio = { ...formData, folio: currentFolio };
+    const dataWithFolio = { 
+      ...formData, 
+      folio: folioData.folio,
+      folioData: folioData,
+      formType: formType
+    };
     
     const dataForWebhook = new FormData();
     for (const key in dataWithFolio) {
@@ -284,6 +308,28 @@ const App: React.FC = () => {
     }));
   }, []);
 
+  const handleShowFolioStats = useCallback(() => {
+    const stats = getFolioStats();
+    console.log('Estadísticas de Folios:', stats);
+    
+    // Crear un mensaje informativo
+    const message = `
+📊 Estadísticas de Folios:
+
+📈 Total de historias: ${stats.total}
+👤 Adultos: ${stats.byType.adulto}
+👶 Pediátricos: ${stats.byType.pediatrico}
+📋 Evoluciones: ${stats.byType.evolucion}
+
+📅 Este mes:
+👤 Adultos: ${stats.currentMonth.adulto}
+👶 Pediátricos: ${stats.currentMonth.pediatrico}
+📋 Evoluciones: ${stats.currentMonth.evolucion}
+    `;
+    
+    alert(message);
+  }, []);
+
 
   return (
     <div className="w-11/12 max-w-4xl mx-auto my-10 p-6 sm:p-10 bg-white rounded-2xl shadow-xl border border-gray-200/80">
@@ -301,6 +347,7 @@ const App: React.FC = () => {
             analysisResult={aiAnalysisResult}
             onSaveNote={handleSaveNote}
             onSaveAnnotations={handleSaveAnnotations}
+            onShowFolioStats={handleShowFolioStats}
             error={error}
         />
       ) : (

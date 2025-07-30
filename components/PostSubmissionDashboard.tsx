@@ -188,11 +188,12 @@ interface PostSubmissionDashboardProps {
   analysisResult: any;
   onSaveNote: (note: Record<string, string>) => void;
   onSaveAnnotations: (note: string) => void;
+  onShowFolioStats: () => void;
   error: string | null;
 }
 
 const PostSubmissionDashboard: React.FC<PostSubmissionDashboardProps> = ({
-    folio, onReset, onExportPDF, isGeneratingPdf, hasDataToExport, onAnalyze, isAnalyzing, analysisResult, onSaveNote, onSaveAnnotations, error
+    folio, onReset, onExportPDF, isGeneratingPdf, hasDataToExport, onAnalyze, isAnalyzing, analysisResult, onSaveNote, onSaveAnnotations, onShowFolioStats, error
 }) => (
     <div className="text-center animate-fade-in">
         <div className="bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl p-8 shadow-lg">
@@ -214,6 +215,10 @@ const PostSubmissionDashboard: React.FC<PostSubmissionDashboardProps> = ({
              <ActionButton onClick={onAnalyze} disabled={isAnalyzing} className="bg-gradient-to-r from-blue-600 to-violet-500 text-white">
                 {isAnalyzing ? <LoaderCircle className="w-5 h-5 animate-spin"/> : <Sparkles className="w-5 h-5" />}
                 {isAnalyzing ? 'Analizando...' : 'Analizar con IA'}
+            </ActionButton>
+            <ActionButton onClick={onShowFolioStats} className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                <FileText className="w-5 h-5" />
+                Estadísticas
             </ActionButton>
         </div>
 
