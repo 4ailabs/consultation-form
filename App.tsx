@@ -233,6 +233,69 @@ const App: React.FC = () => {
       setIsSubmitted(true);
       window.scrollTo(0, 0);
 
+      // Procesar automáticamente con IA después del envío exitoso
+      if (ai) {
+        try {
+          // Formatear datos para el prompt de IA
+          let promptData = `Tipo de Paciente: ${formType}\n`;
+          for(const key in dataWithFolio) {
+            if(dataWithFolio[key] && typeof dataWithFolio[key] === 'string' && dataWithFolio[key].trim() !== ''){
+              const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              promptData += `${label}: ${dataWithFolio[key]}\n`;
+            }
+          }
+
+          const schema = {
+            type: Type.OBJECT,
+            properties: {
+              resumen_clinico: { type: Type.STRING, description: 'Un resumen conciso de los síntomas y datos más relevantes del paciente.' },
+              posibles_relaciones: { type: Type.STRING, description: 'Análisis de las posibles interconexiones entre sistemas, hábitos y síntomas presentados.' },
+              sugerencias_diagnosticas: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Sugerencias de posibles áreas a investigar o diagnósticos diferenciales a considerar por el profesional.' },
+              recomendaciones_nutricionales: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    nutriente: { type: Type.STRING, description: 'El nutriente o compuesto bioactivo recomendado.' },
+                    justificacion: { type: Type.STRING, description: 'La justificación clínica para recomendar este nutriente, basada en los datos del paciente.' }
+                  },
+                  required: ['nutriente', 'justificacion']
+                },
+                description: 'Recomendaciones específicas de nutrientes o suplementos, con justificación.'
+              },
+              recomendaciones_estilo_vida: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Sugerencias sobre cambios en el estilo de vida (dieta, ejercicio, sueño, estrés).' },
+              disclaimer: { type: Type.STRING, description: 'Un descargo de responsabilidad obligatorio indicando que esto es una sugerencia de IA y no un diagnóstico médico.' }
+            },
+            required: ['resumen_clinico', 'posibles_relaciones', 'sugerencias_diagnosticas', 'recomendaciones_nutricionales', 'recomendaciones_estilo_vida', 'disclaimer']
+          };
+
+          const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `Analiza los siguientes datos de un paciente y proporciona un análisis estructurado. La respuesta debe estar en español.\n\n${promptData}`,
+            config: {
+              systemInstruction: "Eres un asistente clínico experto en medicina funcional y nutrición. Tu tarea es analizar los datos del formulario de un paciente para proporcionar información preliminar a un profesional de la salud. Tu respuesta DEBE ser un objeto JSON que se ajuste al esquema proporcionado. No incluyas ningún texto fuera del objeto JSON.",
+              responseMimeType: "application/json",
+              responseSchema: schema,
+            },
+          });
+          
+          const jsonText = response.text.trim();
+          const parsedJson = JSON.parse(jsonText);
+          setAiAnalysisResult(parsedJson);
+          
+          // Actualizar los datos principales con el análisis de IA
+          setLastSubmittedData((prev: any) => ({ 
+            ...prev, 
+            aiAnalysis: parsedJson,
+            processedWithAI: true 
+          }));
+
+        } catch (aiError) {
+          console.error("Error en análisis automático con IA:", aiError);
+          // No mostrar error al usuario, solo log
+        }
+      }
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado.');
       console.error('Error:', err);
@@ -303,6 +366,7 @@ const App: React.FC = () => {
             onAnalyze={handleAiAnalysis}
             isAnalyzing={isAnalyzing}
             analysisResult={aiAnalysisResult}
+            processedWithAI={lastSubmittedData?.processedWithAI}
             onSaveNote={handleSaveNote}
             onSaveAnnotations={handleSaveAnnotations}
             onShowFolioStats={handleShowFolioStats}

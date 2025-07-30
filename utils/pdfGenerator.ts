@@ -24,7 +24,7 @@ export interface PDFSection {
 export interface PDFField {
   label: string;
   value: string | number | any;
-  type?: 'text' | 'vital-signs' | 'list' | 'date' | 'soap';
+  type?: 'text' | 'vital-signs' | 'list' | 'date' | 'soap' | 'complex';
   format?: (value: any) => string;
 }
 
@@ -128,6 +128,11 @@ class PDFGenerator {
         displayValue = this.formatDate(field.value);
       } else if (field.type === 'list' && Array.isArray(field.value)) {
         displayValue = field.value.join(', ');
+      } else if (field.type === 'complex' && Array.isArray(field.value)) {
+        // Formato especial para recomendaciones nutricionales complejas
+        displayValue = field.value.map((item: any) => 
+          `${item.nutriente}: ${item.justificacion}`
+        ).join('\n');
       }
 
       if (displayValue) {
@@ -344,6 +349,17 @@ export const getCompleteHistoryConfig = (data: PDFData): PDFConfig => ({
       title: 'Observaciones',
       fields: [
         { label: 'Observaciones Adicionales', value: data.observaciones }
+      ]
+    },
+    {
+      title: 'Análisis con IA',
+      fields: [
+        { label: 'Resumen Clínico', value: data.aiAnalysis?.resumen_clinico },
+        { label: 'Posibles Interconexiones', value: data.aiAnalysis?.posibles_relaciones },
+        { label: 'Sugerencias Diagnósticas', value: data.aiAnalysis?.sugerencias_diagnosticas, type: 'list' },
+        { label: 'Recomendaciones Nutricionales', value: data.aiAnalysis?.recomendaciones_nutricionales, type: 'complex' },
+        { label: 'Recomendaciones Estilo de Vida', value: data.aiAnalysis?.recomendaciones_estilo_vida, type: 'list' },
+        { label: 'Disclaimer', value: data.aiAnalysis?.disclaimer }
       ]
     },
     {

@@ -19,11 +19,20 @@ const ActionButton: React.FC<ActionButtonProps> = ({ onClick, disabled = false, 
 );
 
 // --- AI Analysis Report Component ---
-const AiAnalysisReport: React.FC<{ analysis: any }> = ({ analysis }) => {
+const AiAnalysisReport: React.FC<{ analysis: any; processedWithAI?: boolean }> = ({ analysis, processedWithAI }) => {
     if (!analysis) return null;
     return (
         <div className="mt-6 border-t pt-6 text-left">
-            <h3 className="flex items-center gap-2 text-xl font-bold text-blue-600 mb-4"><BrainCircuit /> Análisis con IA</h3>
+            <h3 className="flex items-center gap-2 text-xl font-bold text-blue-600 mb-4">
+                <BrainCircuit /> 
+                Análisis con IA
+                {processedWithAI && (
+                    <span className="flex items-center gap-1 text-sm font-normal text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        <Check className="w-4 h-4" />
+                        Procesado automáticamente
+                    </span>
+                )}
+            </h3>
             <div className="p-4 bg-blue-50/70 rounded-lg space-y-4">
                 <div>
                     <h4 className="font-semibold text-gray-800">Resumen Clínico</h4>
@@ -186,6 +195,7 @@ interface PostSubmissionDashboardProps {
   onAnalyze: () => void;
   isAnalyzing: boolean;
   analysisResult: any;
+  processedWithAI?: boolean;
   onSaveNote: (note: Record<string, string>) => void;
   onSaveAnnotations: (note: string) => void;
   onShowFolioStats: () => void;
@@ -193,7 +203,7 @@ interface PostSubmissionDashboardProps {
 }
 
 const PostSubmissionDashboard: React.FC<PostSubmissionDashboardProps> = ({
-    folio, onReset, onExportPDF, isGeneratingPdf, hasDataToExport, onAnalyze, isAnalyzing, analysisResult, onSaveNote, onSaveAnnotations, onShowFolioStats, error
+    folio, onReset, onExportPDF, isGeneratingPdf, hasDataToExport, onAnalyze, isAnalyzing, analysisResult, processedWithAI, onSaveNote, onSaveAnnotations, onShowFolioStats, error
 }) => (
     <div className="text-center animate-fade-in">
         <div className="bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl p-8 shadow-lg">
@@ -229,7 +239,7 @@ const PostSubmissionDashboard: React.FC<PostSubmissionDashboardProps> = ({
             </div>
         )}
         
-        {analysisResult && <AiAnalysisReport analysis={analysisResult} />}
+                    {analysisResult && <AiAnalysisReport analysis={analysisResult} processedWithAI={processedWithAI} />}
 
         <DoctorAnnotations onSave={onSaveAnnotations} />
 
