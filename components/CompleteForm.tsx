@@ -569,6 +569,460 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
           );
         }
 
+      case 3:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              {formType === 'pediatrico' ? 'Historia Clínica' : 'Historia Clínica'}
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enfermedad Actual
+                </label>
+                <textarea
+                  value={formData.medicalHistory?.presentIllness || ''}
+                  onChange={(e) => handleInputChange('medicalHistory', 'presentIllness', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Describa la enfermedad actual del paciente..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Antecedentes Patológicos
+                </label>
+                <textarea
+                  value={formData.medicalHistory?.pastMedicalHistory || ''}
+                  onChange={(e) => handleInputChange('medicalHistory', 'pastMedicalHistory', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enfermedades previas, cirugías, hospitalizaciones..."
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Alergias
+                  </label>
+                  <textarea
+                    value={formData.medicalHistory?.allergies || ''}
+                    onChange={(e) => handleInputChange('medicalHistory', 'allergies', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={2}
+                    placeholder="Alergias a medicamentos, alimentos, etc..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Medicamentos Actuales
+                  </label>
+                  <textarea
+                    value={formData.medicalHistory?.currentMedications || ''}
+                    onChange={(e) => handleInputChange('medicalHistory', 'currentMedications', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={2}
+                    placeholder="Medicamentos que toma actualmente..."
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              {formType === 'pediatrico' ? 'Desarrollo y Crecimiento' : 'Revisión por Sistemas'}
+            </h2>
+            
+            {formType === 'pediatrico' ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Peso Actual (kg)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={formData.pediatricData?.growthHistory?.weightHistory || ''}
+                      onChange={(e) => handleNestedChange('pediatricData', 'growthHistory', 'weightHistory', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Ej: 15.5"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Talla Actual (cm)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={formData.pediatricData?.growthHistory?.heightHistory || ''}
+                      onChange={(e) => handleNestedChange('pediatricData', 'growthHistory', 'heightHistory', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Ej: 95.0"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hitos del Desarrollo
+                  </label>
+                  <textarea
+                    value={formData.pediatricData?.developmentalMilestones?.social || ''}
+                    onChange={(e) => handleNestedChange('pediatricData', 'developmentalMilestones', 'social', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Describa los hitos del desarrollo alcanzados..."
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Cardiovascular
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.cardiovascular || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'cardiovascular', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Dolor torácico, palpitaciones, edema..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Respiratorio
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.respiratory || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'respiratory', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Tos, disnea, sibilancias..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Digestivo
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.gastrointestinal || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'gastrointestinal', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Náuseas, vómitos, dolor abdominal..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Genitourinario
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.genitourinary || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'genitourinary', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Disuria, hematuria, cambios menstruales..."
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              {formType === 'pediatrico' ? 'Revisión por Sistemas' : 'Estilo de Vida'}
+            </h2>
+            
+            {formType === 'pediatrico' ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Cardiovascular
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.cardiovascular || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'cardiovascular', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Dolor torácico, palpitaciones, edema..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Respiratorio
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.respiratory || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'respiratory', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Tos, disnea, sibilancias..."
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hábitos Alimenticios
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.diet || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'diet', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Describa los hábitos alimenticios..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Actividad Física
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.exercise || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'exercise', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Tipo y frecuencia de ejercicio..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hábitos de Sueño
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.sleep || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'sleep', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Horas de sueño, calidad del sueño..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Consumo de Sustancias
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.substances || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'substances', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Tabaco, alcohol, drogas..."
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Signos Vitales</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Presión Arterial (mmHg)
+                </label>
+                <input
+                  type="text"
+                  value={formData.vitalSigns.presion_arterial}
+                  onChange={(e) => handleInputChange('vitalSigns', 'presion_arterial', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ej: 120/80"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Frecuencia Cardíaca (lpm)
+                </label>
+                <input
+                  type="number"
+                  value={formData.vitalSigns.frecuencia_cardiaca}
+                  onChange={(e) => handleInputChange('vitalSigns', 'frecuencia_cardiaca', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ej: 72"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Temperatura (°C)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.vitalSigns.temperatura}
+                  onChange={(e) => handleInputChange('vitalSigns', 'temperatura', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ej: 36.8"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Saturación de Oxígeno (%)
+                </label>
+                <input
+                  type="number"
+                  value={formData.vitalSigns.saturacion_oxigeno}
+                  onChange={(e) => handleInputChange('vitalSigns', 'saturacion_oxigeno', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ej: 98"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Peso (kg)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.vitalSigns.peso}
+                  onChange={(e) => {
+                    handleInputChange('vitalSigns', 'peso', e.target.value);
+                    calculateBMI();
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ej: 70.5"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Talla (cm)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.vitalSigns.talla}
+                  onChange={(e) => {
+                    handleInputChange('vitalSigns', 'talla', e.target.value);
+                    calculateBMI();
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ej: 170.0"
+                />
+              </div>
+              
+              {formData.vitalSigns.bmi && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    IMC Calculado
+                  </label>
+                  <input
+                    type="text"
+                    value={`${formData.vitalSigns.bmi} kg/m²`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                    readOnly
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 7:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Exploración Física</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Examen General
+                </label>
+                <textarea
+                  value={formData.physicalExam.generalExam}
+                  onChange={(e) => handleInputChange('physicalExam', 'generalExam', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Describa el examen físico general..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hallazgos Relevantes
+                </label>
+                <textarea
+                  value={formData.physicalExam.relevantFindings}
+                  onChange={(e) => handleInputChange('physicalExam', 'relevantFindings', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Describa los hallazgos más relevantes..."
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 8:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Exploración Física</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Examen General
+                </label>
+                <textarea
+                  value={formData.physicalExam.generalExam}
+                  onChange={(e) => handleInputChange('physicalExam', 'generalExam', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Describa el examen físico general..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hallazgos Relevantes
+                </label>
+                <textarea
+                  value={formData.physicalExam.relevantFindings}
+                  onChange={(e) => handleInputChange('physicalExam', 'relevantFindings', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Describa los hallazgos más relevantes..."
+                />
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="text-center py-12">
