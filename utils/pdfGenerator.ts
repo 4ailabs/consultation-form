@@ -280,21 +280,21 @@ export const getCompleteHistoryConfig = (data: PDFData): PDFConfig => ({
     {
       title: 'Datos Personales',
       fields: [
-        { label: 'Nombre Completo', value: data.personalData?.fullName },
+        { label: 'Nombre Completo', value: data.personalData?.fullName || data.nombre },
         { label: 'Fecha de Nacimiento', value: data.personalData?.dateOfBirth, type: 'date' },
-        { label: 'Edad', value: data.personalData?.age ? `${data.personalData.age} años` : '' },
-        { label: 'Género', value: data.personalData?.gender },
+        { label: 'Edad', value: data.personalData?.age ? `${data.personalData.age} años` : data.edad ? `${data.edad} años` : '' },
+        { label: 'Género', value: data.personalData?.gender || data.genero },
         { label: 'Estado Civil', value: data.personalData?.maritalStatus },
         { label: 'Ocupación', value: data.personalData?.occupation },
-        { label: 'Teléfono', value: data.personalData?.phone },
-        { label: 'Email', value: data.personalData?.email },
-        { label: 'Dirección', value: data.personalData?.address }
+        { label: 'Teléfono', value: data.personalData?.phone || data.telefono },
+        { label: 'Email', value: data.personalData?.email || data.email },
+        { label: 'Dirección', value: data.personalData?.address || data.direccion }
       ]
     },
     {
       title: 'Motivo de Consulta',
       fields: [
-        { label: 'Motivo Principal', value: data.chiefComplaint?.mainComplaint },
+        { label: 'Motivo Principal', value: data.chiefComplaint?.mainComplaint || data.motivo_consulta },
         { label: 'Duración', value: data.chiefComplaint?.duration },
         { label: 'Intensidad', value: data.chiefComplaint?.intensity },
         { label: 'Factores Agravantes', value: data.chiefComplaint?.aggravatingFactors },
@@ -305,10 +305,10 @@ export const getCompleteHistoryConfig = (data: PDFData): PDFConfig => ({
       title: 'Historia Clínica',
       fields: [
         { label: 'Enfermedad Actual', value: data.medicalHistory?.presentIllness },
-        { label: 'Antecedentes Patológicos', value: data.medicalHistory?.pastMedicalHistory },
+        { label: 'Antecedentes Patológicos', value: data.medicalHistory?.pastMedicalHistory || data.antecedentes },
         { label: 'Antecedentes Quirúrgicos', value: data.medicalHistory?.surgicalHistory },
-        { label: 'Alergias', value: data.medicalHistory?.allergies },
-        { label: 'Medicamentos Actuales', value: data.medicalHistory?.currentMedications, type: 'list' },
+        { label: 'Alergias', value: data.medicalHistory?.allergies || data.alergias },
+        { label: 'Medicamentos Actuales', value: data.medicalHistory?.currentMedications || data.medicamentos, type: 'list' },
         { label: 'Antecedentes Familiares', value: data.medicalHistory?.familyHistory }
       ]
     },
@@ -332,6 +332,18 @@ export const getCompleteHistoryConfig = (data: PDFData): PDFConfig => ({
         { label: 'Circunferencia de Cintura', value: data.vitalSigns?.anthropometry?.waistCircumference },
         { label: 'Circunferencia de Cadera', value: data.vitalSigns?.anthropometry?.hipCircumference },
         { label: 'Relación Cintura/Cadera', value: data.vitalSigns?.anthropometry?.waistHipRatio }
+      ]
+    },
+    {
+      title: 'Síntomas',
+      fields: [
+        { label: 'Síntomas', value: data.sintomas }
+      ]
+    },
+    {
+      title: 'Observaciones',
+      fields: [
+        { label: 'Observaciones Adicionales', value: data.observaciones }
       ]
     },
     {

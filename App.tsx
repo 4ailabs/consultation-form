@@ -88,8 +88,14 @@ const App: React.FC = () => {
                 ...dataForReport,
                 formType: formType
             });
+        } else if (dataForReport.nombre || dataForReport.personalData?.fullName) {
+            // Historia clínica completa (básica o completa)
+            generateCompleteHistoryPDF({
+                ...dataForReport,
+                formType: formType
+            });
         } else {
-            // Historia clínica completa
+            // Fallback para otros tipos
             generateCompleteHistoryPDF({
                 ...dataForReport,
                 formType: formType
