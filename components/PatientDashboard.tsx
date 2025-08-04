@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   Search, 
   UserPlus, 
@@ -14,6 +14,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import SystemMetrics from './SystemMetrics';
+import { usePatients, useConsultations } from '../hooks/useSupabase';
 
 interface Patient {
   id: string;
@@ -49,51 +50,54 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<'dashboard' | 'patients' | 'consultations' | 'reports'>('dashboard');
   const [showMetrics, setShowMetrics] = useState(false);
 
-  // Mock data - En producción vendría de una base de datos
-  const [patients] = useState<Patient[]>([
-    {
-      id: '1',
-      folio: 'HC-2024-001',
-      fullName: 'María González López',
-      age: 35,
-      gender: 'Femenino',
-      phone: '555-0123',
-      lastVisit: '2024-08-01',
-      nextAppointment: '2024-08-15',
-      status: 'active',
-      formType: 'adulto'
-    },
-    {
-      id: '2',
-      folio: 'HC-2024-002',
-      fullName: 'Carlos Rodríguez',
-      age: 28,
-      gender: 'Masculino',
-      phone: '555-0456',
-      lastVisit: '2024-07-28',
-      status: 'active',
-      formType: 'adulto'
-    },
-    {
-      id: '3',
-      folio: 'HC-2024-003',
-      fullName: 'Ana Martínez',
-      age: 8,
-      gender: 'Femenino',
-      phone: '555-0789',
-      lastVisit: '2024-08-02',
-      nextAppointment: '2024-08-20',
-      status: 'active',
-      formType: 'pediatrico'
-    }
-  ]);
+  // Conectar con Supabase
+  const { patients: supabasePatients, loading: patientsLoading } = usePatients();
+  const { consultations, loading: consultationsLoading, getStats } = useConsultations();
+  
+  // Convertir datos de Supabase al formato del Dashboard
+  const patients: Patient[] = supabasePatients.map(p => ({
+    id: p.id,
+    folio: p.folio,
+    fullName: p.full_name,
+    age: p.age,
+    gender: p.gender,
+    phone: p.phone,
+    lastVisit: p.created_at,
+    nextAppointment: undefined, // No tenemos este campo en Supabase
+    status: 'active' as const,
+    formType: 'adulto' as const // Por defecto, podríamos inferir del historial
+  }));
 
-  const [stats] = useState<DashboardStats>({
-    totalPatients: 156,
-    todayAppointments: 8,
-    pendingFollowUps: 12,
-    recentConsultations: 24
+  // Calcular estadísticas reales
+  const [stats, setStats] = useState<DashboardStats>({
+    totalPatients: 0,
+    todayAppointments: 0,
+    pendingFollowUps: 0,
+    recentConsultations: 0
   });
+
+  // Actualizar estadísticas cuando cambien los datos
+  useEffect(() => {
+    const updateStats = async () => {
+      try {
+        const consultationStats = await getStats();
+        setStats({
+          totalPatients: patients.length,
+          todayAppointments: consultations.filter(c => {
+            const today = new Date().toDateString();
+            const consultationDate = new Date(c.created_at).toDateString();
+            return today === consultationDate;
+          }).length,
+          pendingFollowUps: consultations.filter(c => c.status === 'draft').length,
+          recentConsultations: consultations.length
+        });
+      } catch (error) {
+        console.error('Error obteniendo estadísticas:', error);
+      }
+    };
+
+    updateStats();
+  }, [patients, consultations, getStats]);
 
   const filteredPatients = patients.filter(patient =>
     patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -201,7 +205,11 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Pacientes</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalPatients}</p>
+                    {patientsLoading ? (
+                      <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">{stats.totalPatients}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -213,7 +221,11 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Citas Hoy</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.todayAppointments}</p>
+                    {consultationsLoading ? (
+                      <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">{stats.todayAppointments}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -225,7 +237,11 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Seguimientos Pendientes</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.pendingFollowUps}</p>
+                    {consultationsLoading ? (
+                      <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">{stats.pendingFollowUps}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -237,7 +253,11 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Consultas Recientes</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.recentConsultations}</p>
+                    {consultationsLoading ? (
+                      <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">{stats.recentConsultations}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -292,8 +312,33 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 <h3 className="text-lg font-medium text-gray-900">Pacientes Recientes</h3>
               </div>
               <div className="p-6">
-                <div className="space-y-4">
-                  {patients.slice(0, 5).map((patient) => (
+                {patientsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                          <div>
+                            <div className="h-4 bg-gray-200 rounded w-32 animate-pulse mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+                          <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : patients.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No hay pacientes registrados</p>
+                    <p className="text-sm text-gray-500 mt-2">Crea tu primer paciente para comenzar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {patients.slice(0, 5).map((patient) => (
                     <div
                       key={patient.id}
                       className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
