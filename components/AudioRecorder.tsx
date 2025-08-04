@@ -172,8 +172,12 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
       const formData = new FormData();
       formData.append('audioFile', audioBlob, uploadedFileName || 'recording.webm');
       
-      // URL del backend de transcripción desplegado en Vercel
-      const response = await fetch('https://clinica-transcripcion.vercel.app/api/transcription/upload', {
+      // URL del backend (usar local en desarrollo, producción en Vercel)
+      const baseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3001' 
+        : 'https://clinica-transcripcion.vercel.app';
+      
+      const response = await fetch(`${baseUrl}/api/transcription/upload`, {
         method: 'POST',
         body: formData,
       });

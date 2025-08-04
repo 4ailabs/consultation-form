@@ -65,8 +65,12 @@ Responde en formato JSON con la siguiente estructura:
 }
 `;
 
-    // Llamar a la API de Gemini
-    const response = await fetch('https://clinica-transcripcion.vercel.app/api/transcription/analyze', {
+    // Llamar a la API de Gemini (usar local en desarrollo, producción en Vercel)
+    const baseUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3001' 
+      : 'https://clinica-transcripcion.vercel.app';
+    
+    const response = await fetch(`${baseUrl}/api/transcription/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
