@@ -1,5 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { User, Baby, FileText, Calendar, Phone, Mail, MapPin, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { User, Baby, FileText, Calendar, Phone, Mail, MapPin, ChevronLeft, ChevronRight, CheckCircle, Mic, Square, FileAudio } from 'lucide-react';
+import AudioRecorder from './AudioRecorder';
+import TranscriptionResults from './TranscriptionResults';
 
 interface CompleteFormProps {
   onSubmit: (data: any) => void;
@@ -9,6 +11,12 @@ interface CompleteFormProps {
 
 const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, formType }) => {
   const [currentSection, setCurrentSection] = useState(1);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [transcriptionData, setTranscriptionData] = useState<{
+    transcription: string;
+    analysis: string;
+  } | null>(null);
   const [formData, setFormData] = useState({
     personalData: {
       fullName: '',
@@ -112,6 +120,7 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
     'Datos Personales',
     'Datos Perinatales',
     'Motivo de Consulta',
+    'Grabación de Sesión',
     'Historia Clínica',
     'Desarrollo y Crecimiento',
     'Revisión por Sistemas',
@@ -120,6 +129,7 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
   ] : [
     'Datos Personales',
     'Motivo de Consulta',
+    'Grabación de Sesión',
     'Historia Clínica',
     'Revisión por Sistemas',
     'Estilo de Vida',
@@ -149,6 +159,36 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
       }
     }));
   };
+
+  const handleTranscriptionComplete = useCallback((transcription: string, analysis: string) => {
+    setTranscriptionData({ transcription, analysis });
+  }, []);
+
+  const handleUseTranscription = useCallback((transcription: string) => {
+    // Auto-completar campos relevantes con la transcripción
+    setFormData(prev => ({
+      ...prev,
+      chiefComplaint: {
+        ...prev.chiefComplaint,
+        reason: transcription
+      },
+      medicalHistory: {
+        ...prev.medicalHistory,
+        presentIllness: transcription
+      }
+    }));
+  }, []);
+
+  const handleUseAnalysis = useCallback((analysis: string) => {
+    // Auto-completar campos con el análisis estructurado
+    setFormData(prev => ({
+      ...prev,
+      medicalHistory: {
+        ...prev.medicalHistory,
+        presentIllness: analysis
+      }
+    }));
+  }, []);
 
   const calculateAge = useCallback((birthDate: string) => {
     if (birthDate && birthDate.trim() !== '') {
@@ -573,6 +613,32 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              Grabación de Sesión
+            </h2>
+            
+            <div className="space-y-6">
+              <AudioRecorder
+                onTranscriptionComplete={handleTranscriptionComplete}
+                isRecording={isRecording}
+                setIsRecording={setIsRecording}
+              />
+              
+              {transcriptionData && (
+                <TranscriptionResults
+                  transcription={transcriptionData.transcription}
+                  analysis={transcriptionData.analysis}
+                  onUseTranscription={handleUseTranscription}
+                  onUseAnalysis={handleUseAnalysis}
+                />
+              )}
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
               {formType === 'pediatrico' ? 'Historia Clínica' : 'Historia Clínica'}
             </h2>
             
@@ -634,7 +700,7 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -746,7 +812,7 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
           </div>
         );
 
-      case 5:
+      case 6:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -843,7 +909,104 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
           </div>
         );
 
-      case 6:
+      case 7:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              {formType === 'pediatrico' ? 'Revisión por Sistemas' : 'Estilo de Vida'}
+            </h2>
+            
+            {formType === 'pediatrico' ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Cardiovascular
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.cardiovascular || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'cardiovascular', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Dolor torácico, palpitaciones, edema..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sistema Respiratorio
+                    </label>
+                    <textarea
+                      value={formData.systemReview?.respiratory || ''}
+                      onChange={(e) => handleInputChange('systemReview', 'respiratory', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Tos, disnea, sibilancias..."
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hábitos Alimenticios
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.diet || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'diet', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Describa los hábitos alimenticios..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Actividad Física
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.exercise || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'exercise', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Tipo y frecuencia de ejercicio..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hábitos de Sueño
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.sleep || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'sleep', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Horas de sueño, calidad del sueño..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Consumo de Sustancias
+                    </label>
+                    <textarea
+                      value={formData.lifestyle?.substances || ''}
+                      onChange={(e) => handleInputChange('lifestyle', 'substances', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={2}
+                      placeholder="Tabaco, alcohol, drogas..."
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Signos Vitales</h2>
@@ -943,47 +1106,12 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
                   </label>
                   <input
                     type="text"
-                    value={`${formData.vitalSigns.bmi} kg/m²`}
+                    value={formData.vitalSigns.bmi}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
                     readOnly
                   />
                 </div>
               )}
-            </div>
-          </div>
-        );
-
-      case 7:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Exploración Física</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Examen General
-                </label>
-                <textarea
-                  value={formData.physicalExam.generalExam}
-                  onChange={(e) => handleInputChange('physicalExam', 'generalExam', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={4}
-                  placeholder="Describa el examen físico general..."
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hallazgos Relevantes
-                </label>
-                <textarea
-                  value={formData.physicalExam.relevantFindings}
-                  onChange={(e) => handleInputChange('physicalExam', 'relevantFindings', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={4}
-                  placeholder="Describa los hallazgos más relevantes..."
-                />
-              </div>
             </div>
           </div>
         );
@@ -1001,7 +1129,7 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
                 <textarea
                   value={formData.physicalExam.generalExam}
                   onChange={(e) => handleInputChange('physicalExam', 'generalExam', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={4}
                   placeholder="Describa el examen físico general..."
                 />
@@ -1014,7 +1142,7 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
                 <textarea
                   value={formData.physicalExam.relevantFindings}
                   onChange={(e) => handleInputChange('physicalExam', 'relevantFindings', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={4}
                   placeholder="Describa los hallazgos más relevantes..."
                 />
@@ -1049,6 +1177,158 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
         <p className="text-gray-600">
           Formulario completo para historia clínica {formType === 'adulto' ? 'de adultos' : 'pediátrica'}.
         </p>
+      </div>
+
+      {/* Botón de Grabación Rápida */}
+      <div className="mb-6">
+        <div className="bg-white rounded-lg p-4 shadow-md border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-full ${isRecording ? 'bg-red-100' : 'bg-gray-100'}`}>
+                <Mic className={`w-5 h-5 ${isRecording ? 'text-red-600' : 'text-gray-600'}`} />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-800">
+                  {isRecording ? 'Grabando sesión...' : 'Grabación de Sesión'}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {isRecording 
+                    ? `Tiempo: ${Math.floor(recordingTime / 60)}:${(recordingTime % 60).toString().padStart(2, '0')}`
+                    : 'Inicia la grabación de la consulta desde el principio'
+                  }
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {!isRecording && !transcriptionData && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const startRecording = async () => {
+                        try {
+                          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                          const mediaRecorder = new MediaRecorder(stream, {
+                            mimeType: 'audio/webm;codecs=opus'
+                          });
+                          
+                          const chunks: Blob[] = [];
+                          
+                          mediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                              chunks.push(event.data);
+                            }
+                          };
+                          
+                          mediaRecorder.onstop = () => {
+                            const blob = new Blob(chunks, { type: 'audio/webm' });
+                            const url = URL.createObjectURL(blob);
+                            setTranscriptionData({
+                              transcription: 'Audio grabado - Ve a la sección de grabación para transcribir',
+                              analysis: 'Audio disponible para transcripción'
+                            });
+                            stream.getTracks().forEach(track => track.stop());
+                          };
+                          
+                          mediaRecorder.start();
+                          setIsRecording(true);
+                          setRecordingTime(0);
+                          
+                          const timer = setInterval(() => {
+                            setRecordingTime(prev => prev + 1);
+                          }, 1000);
+                          
+                          // Guardar referencia para detener
+                          (window as any).recordingTimer = timer;
+                          (window as any).mediaRecorder = mediaRecorder;
+                        } catch (err) {
+                          console.error('Error al iniciar grabación:', err);
+                        }
+                      };
+                      startRecording();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                  >
+                    <Mic className="w-4 h-4" />
+                    Grabar
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'audio/*,.webm,.mp3,.wav,.m4a';
+                      input.onchange = (event) => {
+                        const file = (event.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          // Validar que sea un archivo de audio
+                          if (!file.type.startsWith('audio/') && 
+                              !file.name.toLowerCase().endsWith('.webm') &&
+                              !file.name.toLowerCase().endsWith('.mp3') &&
+                              !file.name.toLowerCase().endsWith('.wav') &&
+                              !file.name.toLowerCase().endsWith('.m4a')) {
+                            alert('Por favor selecciona un archivo de audio válido (MP3, WAV, M4A, WebM)');
+                            return;
+                          }
+
+                          // Validar tamaño (máximo 8MB)
+                          if (file.size > 8 * 1024 * 1024) {
+                            alert('El archivo es demasiado grande. Máximo 8MB permitido.');
+                            return;
+                          }
+
+                          setTranscriptionData({
+                            transcription: `Archivo subido: ${file.name} - Ve a la sección de grabación para transcribir`,
+                            analysis: 'Audio disponible para transcripción'
+                          });
+                        }
+                      };
+                      input.click();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  >
+                    <FileAudio className="w-4 h-4" />
+                    Subir Archivo
+                  </button>
+                </>
+              )}
+              
+              {isRecording && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if ((window as any).mediaRecorder) {
+                      (window as any).mediaRecorder.stop();
+                      setIsRecording(false);
+                      if ((window as any).recordingTimer) {
+                        clearInterval((window as any).recordingTimer);
+                      }
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                >
+                  <Square className="w-4 h-4" />
+                  Detener Grabación
+                </button>
+              )}
+              
+              {transcriptionData && !isRecording && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-green-600 font-medium">✓ Audio grabado</span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentSection(3)}
+                    className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Ir a Transcripción
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Progress Bar */}

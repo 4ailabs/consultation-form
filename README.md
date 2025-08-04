@@ -12,7 +12,8 @@ Un sistema completo y moderno para la gestión de historias clínicas, formulari
 - **📋 Nota de Evolución** - Seguimiento rápido y eficiente
 
 ### 🚀 Funcionalidades Avanzadas
-- **🤖 Análisis con IA** - Integración con Google Gemini para análisis clínico
+- **🎤 Grabación y Transcripción** - Grabación de audio con transcripción automática usando Google Speech-to-Text
+- **🤖 Análisis con IA** - Integración con Google Gemini para análisis clínico estructurado
 - **📄 Generación de PDF** - Reportes imprimibles automáticos
 - **💾 Auto-guardado** - Persistencia de datos en localStorage
 - **📱 Responsive Design** - Funciona perfectamente en móviles y desktop
@@ -87,24 +88,26 @@ comprehensive-consultation-form/
 
 ## 📋 Secciones del Formulario Completo
 
-### Para Adultos (7 secciones):
+### Para Adultos (8 secciones):
 1. **Datos Personales** - Información básica y contacto
 2. **Motivo de Consulta** - Descripción del problema
-3. **Historia Clínica** - Antecedentes, alergias, vacunación
-4. **Revisión por Sistemas** - Cardiovascular, respiratorio, digestivo
-5. **Estilo de Vida** - Actividad física, nutrición, sueño, salud mental
-6. **Signos Vitales** - Presión arterial, temperatura, IMC
-7. **Exploración Física** - Examen físico completo
+3. **🎤 Grabación de Sesión** - Grabación y transcripción de la consulta
+4. **Historia Clínica** - Antecedentes, alergias, vacunación
+5. **Revisión por Sistemas** - Cardiovascular, respiratorio, digestivo
+6. **Estilo de Vida** - Actividad física, nutrición, sueño, salud mental
+7. **Signos Vitales** - Presión arterial, temperatura, IMC
+8. **Exploración Física** - Examen físico completo
 
-### Para Pediátricos (8 secciones):
+### Para Pediátricos (9 secciones):
 1. **Datos Personales** - Información básica
 2. **Datos Perinatales** - Nacimiento, lactancia, desarrollo
 3. **Motivo de Consulta** - Descripción del problema
-4. **Historia Clínica** - Antecedentes y vacunación
-5. **Desarrollo y Crecimiento** - Hitos del desarrollo
-6. **Revisión por Sistemas** - Sistemas corporales
-7. **Signos Vitales** - Medidas antropométricas
-8. **Exploración Física** - Examen físico
+4. **🎤 Grabación de Sesión** - Grabación y transcripción de la consulta
+5. **Historia Clínica** - Antecedentes y vacunación
+6. **Desarrollo y Crecimiento** - Hitos del desarrollo
+7. **Revisión por Sistemas** - Sistemas corporales
+8. **Signos Vitales** - Medidas antropométricas
+9. **Exploración Física** - Examen físico
 
 ## 🔧 Configuración
 
@@ -116,6 +119,28 @@ API_KEY=tu_clave_de_google_gemini
 # Webhook para envío de datos (opcional)
 WEBHOOK_URL=https://hook.us1.make.com/tu_webhook
 ```
+
+### Configuración del Backend de Transcripción
+
+Para usar la funcionalidad de grabación y transcripción, necesitas configurar el backend:
+
+1. **Configurar Google Cloud Speech-to-Text**:
+   - Habilitar API de Speech-to-Text
+   - Crear credenciales de servicio
+   - Configurar variables de entorno
+
+2. **Configurar Gemini AI**:
+   - Obtener API Key de Google AI Studio
+   - Configurar en variables de entorno
+
+3. **Ejecutar el backend**:
+   ```bash
+   cd ../clinica-transcripcion-backend
+   npm install
+   npm start
+   ```
+
+Ver [TRANSCRIPTION_SETUP.md](./TRANSCRIPTION_SETUP.md) para instrucciones detalladas.
 
 ### Personalización
 - **Colores**: Editar `tailwind.config.js`
@@ -142,11 +167,19 @@ npm run build
 
 ## 📊 Funcionalidades Avanzadas
 
+### 🎤 Grabación y Transcripción
+- Grabación de audio en tiempo real
+- Transcripción automática con Google Speech-to-Text
+- Análisis estructurado específico para biomagnetismo
+- Auto-completado de campos del formulario
+- Soporte para múltiples formatos de audio
+
 ### 🤖 Análisis con IA
 - Resumen clínico automático
 - Sugerencias diagnósticas
 - Recomendaciones nutricionales
 - Análisis de estilo de vida
+- Análisis específico para consultas de biomagnetismo y bioenergética
 
 ### 📄 Generación de PDF
 - Reportes profesionales
