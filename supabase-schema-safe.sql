@@ -1,4 +1,4 @@
--- 🏥 ESQUEMA DE BASE DE DATOS PARA SISTEMA MÉDICO (VERSIÓN SEGURA)
+-- 🏥 ESQUEMA DE BASE DE DATOS PARA SMARTCLINIC AI (VERSIÓN SEGURA)
 -- Ejecuta este script en el SQL Editor de Supabase
 
 -- Habilitar extensiones necesarias
@@ -192,7 +192,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 📝 COMENTARIOS EN LAS TABLAS
-COMMENT ON TABLE patients IS 'Tabla principal de pacientes del sistema médico';
+COMMENT ON TABLE patients IS 'Tabla principal de pacientes de SmartClinic AI';
 COMMENT ON TABLE consultations IS 'Tabla de consultas médicas con datos completos';
 COMMENT ON TABLE smart_flow_data IS 'Datos del flujo inteligente para análisis de IA';
 COMMENT ON TABLE system_stats IS 'Estadísticas del sistema para cache y reportes';

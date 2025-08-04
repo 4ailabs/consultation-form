@@ -30,7 +30,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, onViewChange }) =>
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">🏥 Sistema Médico</h1>
+                              <h1 className="text-xl font-bold text-gray-900">🏥 SmartClinic AI</h1>
             </div>
             <nav className="ml-10 flex space-x-8">
               <button

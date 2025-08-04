@@ -1,4 +1,4 @@
-# 🏥 Configuración de Supabase para Sistema Médico
+# 🏥 Configuración de Supabase para SmartClinic AI
 
 ## 📋 Pasos para Configurar Supabase
 
@@ -242,7 +242,7 @@ Si tienes problemas:
 
 ## 🎉 ¡Listo!
 
-Una vez completados estos pasos, tu sistema médico estará completamente integrado con Supabase y podrás:
+Una vez completados estos pasos, SmartClinic AI estará completamente integrado con Supabase y podrás:
 
 - ✅ Almacenar pacientes y consultas
 - ✅ Usar el flujo inteligente con persistencia
