@@ -31,32 +31,111 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
     // Tipo de consulta
     consultation_type: 'adulto',
     
-    // Síntomas principales
-    main_symptoms: '',
-    symptom_duration: '',
-    symptom_severity: 'leve',
+    // Datos personales completos
+    personalData: {
+      fullName: patient?.full_name || '',
+      dateOfBirth: '',
+      age: patient?.age || '',
+      gender: patient?.gender || '',
+      maritalStatus: '',
+      occupation: '',
+      phone: patient?.phone || '',
+      email: '',
+      address: '',
+      emergencyContact: {
+        name: '',
+        relationship: '',
+        phone: ''
+      }
+    },
     
-    // Antecedentes
-    medical_history: '',
-    current_medications: '',
-    allergies: '',
+    // Motivo de consulta
+    chiefComplaint: {
+      reason: '',
+      duration: '',
+      severity: 'Leve',
+      aggravatingFactors: '',
+      relievingFactors: ''
+    },
+    
+    // Historia médica
+    medicalHistory: {
+      presentIllness: '',
+      pastMedicalHistory: '',
+      allergies: '',
+      medications: '',
+      familyHistory: ''
+    },
+    
+    // Revisión por sistemas
+    systemReview: {
+      cardiovascular: '',
+      respiratory: '',
+      gastrointestinal: '',
+      genitourinary: '',
+      musculoskeletal: '',
+      neurological: '',
+      dermatological: '',
+      psychological: ''
+    },
+    
+    // Estilo de vida
+    lifestyle: {
+      physicalActivity: '',
+      nutrition: '',
+      sleep: '',
+      mentalHealth: '',
+      toxicHabits: ''
+    },
+    
+    // Signos vitales
+    vitalSigns: {
+      bloodPressure: '',
+      heartRate: '',
+      respiratoryRate: '',
+      temperature: '',
+      oxygenSaturation: '',
+      weight: '',
+      height: '',
+      bmi: ''
+    },
     
     // Examen físico
-    vital_signs: {
-      blood_pressure: '',
-      heart_rate: '',
-      temperature: '',
-      weight: '',
-      height: ''
+    physicalExam: {
+      general: '',
+      head: '',
+      neck: '',
+      chest: '',
+      cardiovascular: '',
+      respiratory: '',
+      abdomen: '',
+      extremities: '',
+      neurological: '',
+      skin: ''
+    },
+    
+    // Datos pediátricos (si aplica)
+    pediatricData: {
+      birthWeight: '',
+      birthLength: '',
+      gestationalAge: '',
+      deliveryType: 'Vaginal',
+      complications: '',
+      developmentalMilestones: {
+        social: '',
+        language: '',
+        motor: '',
+        cognitive: ''
+      },
+      immunizations: '',
+      growthChart: ''
     },
     
     // Diagnóstico y tratamiento
     diagnosis: '',
-    treatment_plan: '',
+    treatmentPlan: '',
     recommendations: '',
-    
-    // Notas adicionales
-    notes: '',
+    followUp: '',
     
     // Datos de transcripción
     transcription: '',
@@ -98,21 +177,42 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
         folio,
         form_type: formData.consultation_type,
         flow_type: 'complete',
-        chief_complaint: formData.main_symptoms,
-        symptoms: formData.main_symptoms ? [formData.main_symptoms] : [],
-        medications: formData.current_medications ? [formData.current_medications] : [],
-        observations: formData.notes,
+        chief_complaint: formData.chiefComplaint.reason,
+        symptoms: formData.chiefComplaint.reason ? [formData.chiefComplaint.reason] : [],
+        medications: formData.medicalHistory.medications ? [formData.medicalHistory.medications] : [],
+        observations: formData.followUp,
         transcription: formData.transcription,
         ai_analysis: aiAnalysis ? JSON.stringify(aiAnalysis) : null,
         extracted_data: {
-          symptom_duration: formData.symptom_duration,
-          symptom_severity: formData.symptom_severity,
-          medical_history: formData.medical_history,
-          allergies: formData.allergies,
-          vital_signs: formData.vital_signs,
+          // Datos personales
+          personalData: formData.personalData,
+          
+          // Motivo de consulta
+          chiefComplaint: formData.chiefComplaint,
+          
+          // Historia médica
+          medicalHistory: formData.medicalHistory,
+          
+          // Revisión por sistemas
+          systemReview: formData.systemReview,
+          
+          // Estilo de vida
+          lifestyle: formData.lifestyle,
+          
+          // Signos vitales
+          vitalSigns: formData.vitalSigns,
+          
+          // Examen físico
+          physicalExam: formData.physicalExam,
+          
+          // Datos pediátricos
+          pediatricData: formData.pediatricData,
+          
+          // Diagnóstico y tratamiento
           diagnosis: formData.diagnosis,
-          treatment_plan: formData.treatment_plan,
-          recommendations: formData.recommendations
+          treatmentPlan: formData.treatmentPlan,
+          recommendations: formData.recommendations,
+          followUp: formData.followUp
         },
         elapsed_time: 0,
         estimated_time: 15,
@@ -311,237 +411,426 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
       )}
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Formulario de Consulta</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Historia Clínica Completa</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Síntomas principales */}
-          <div className="md:col-span-2">
-            <h4 className="text-md font-medium text-gray-800 mb-3">Síntomas Principales</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Síntomas Principales *
-                </label>
-                <textarea
-                  value={formData.main_symptoms}
-                  onChange={(e) => setFormData({...formData, main_symptoms: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Describa los síntomas principales..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Duración
-                </label>
-                <input
-                  type="text"
-                  value={formData.symptom_duration}
-                  onChange={(e) => setFormData({...formData, symptom_duration: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ej: 3 días"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Severidad
-                </label>
-                <select
-                  value={formData.symptom_severity}
-                  onChange={(e) => setFormData({...formData, symptom_severity: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="leve">Leve</option>
-                  <option value="moderado">Moderado</option>
-                  <option value="severo">Severo</option>
-                </select>
-              </div>
+        {/* Datos Personales */}
+        <div className="mb-8">
+          <h4 className="text-lg font-medium text-gray-800 mb-4 border-b pb-2">📋 Datos Personales</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+              <input
+                type="text"
+                value={formData.personalData.fullName}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, fullName: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+              <input
+                type="date"
+                value={formData.personalData.dateOfBirth}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, dateOfBirth: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Edad</label>
+              <input
+                type="number"
+                value={formData.personalData.age}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, age: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Género</label>
+              <select
+                value={formData.personalData.gender}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, gender: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Seleccionar</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
+              <input
+                type="text"
+                value={formData.personalData.maritalStatus}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, maritalStatus: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ocupación</label>
+              <input
+                type="text"
+                value={formData.personalData.occupation}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, occupation: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+              <input
+                type="tel"
+                value={formData.personalData.phone}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, phone: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.personalData.email}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, email: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+              <input
+                type="text"
+                value={formData.personalData.address}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  personalData: { ...formData.personalData, address: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
           </div>
+        </div>
 
-          {/* Antecedentes */}
-          <div className="md:col-span-2">
-            <h4 className="text-md font-medium text-gray-800 mb-3">Antecedentes</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Antecedentes Médicos
-                </label>
-                <textarea
-                  value={formData.medical_history}
-                  onChange={(e) => setFormData({...formData, medical_history: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Enfermedades previas, cirugías..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Medicamentos Actuales
-                </label>
-                <textarea
-                  value={formData.current_medications}
-                  onChange={(e) => setFormData({...formData, current_medications: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Medicamentos que toma actualmente..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Alergias
-                </label>
-                <textarea
-                  value={formData.allergies}
-                  onChange={(e) => setFormData({...formData, allergies: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Alergias conocidas..."
-                />
-              </div>
+        {/* Motivo de Consulta */}
+        <div className="mb-8">
+          <h4 className="text-lg font-medium text-gray-800 mb-4 border-b pb-2">🏥 Motivo de Consulta</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Motivo Principal</label>
+              <textarea
+                value={formData.chiefComplaint.reason}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  chiefComplaint: { ...formData.chiefComplaint, reason: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Describa el motivo principal de la consulta..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Duración</label>
+              <input
+                type="text"
+                value={formData.chiefComplaint.duration}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  chiefComplaint: { ...formData.chiefComplaint, duration: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ej: 3 días, 2 semanas..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Severidad</label>
+              <select
+                value={formData.chiefComplaint.severity}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  chiefComplaint: { ...formData.chiefComplaint, severity: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="Leve">Leve</option>
+                <option value="Moderado">Moderado</option>
+                <option value="Severo">Severo</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Factores Agravantes</label>
+              <textarea
+                value={formData.chiefComplaint.aggravatingFactors}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  chiefComplaint: { ...formData.chiefComplaint, aggravatingFactors: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={2}
+                placeholder="¿Qué empeora los síntomas?"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Factores Aliviadores</label>
+              <textarea
+                value={formData.chiefComplaint.relievingFactors}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  chiefComplaint: { ...formData.chiefComplaint, relievingFactors: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={2}
+                placeholder="¿Qué alivia los síntomas?"
+              />
             </div>
           </div>
+        </div>
 
-          {/* Signos vitales */}
-          <div className="md:col-span-2">
-            <h4 className="text-md font-medium text-gray-800 mb-3">Signos Vitales</h4>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Presión Arterial
-                </label>
-                <input
-                  type="text"
-                  value={formData.vital_signs.blood_pressure}
-                  onChange={(e) => setFormData({
-                    ...formData, 
-                    vital_signs: {...formData.vital_signs, blood_pressure: e.target.value}
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="120/80"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Frecuencia Cardíaca
-                </label>
-                <input
-                  type="text"
-                  value={formData.vital_signs.heart_rate}
-                  onChange={(e) => setFormData({
-                    ...formData, 
-                    vital_signs: {...formData.vital_signs, heart_rate: e.target.value}
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="72 bpm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Temperatura
-                </label>
-                <input
-                  type="text"
-                  value={formData.vital_signs.temperature}
-                  onChange={(e) => setFormData({
-                    ...formData, 
-                    vital_signs: {...formData.vital_signs, temperature: e.target.value}
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="36.5°C"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Peso
-                </label>
-                <input
-                  type="text"
-                  value={formData.vital_signs.weight}
-                  onChange={(e) => setFormData({
-                    ...formData, 
-                    vital_signs: {...formData.vital_signs, weight: e.target.value}
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="70 kg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Altura
-                </label>
-                <input
-                  type="text"
-                  value={formData.vital_signs.height}
-                  onChange={(e) => setFormData({
-                    ...formData, 
-                    vital_signs: {...formData.vital_signs, height: e.target.value}
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="170 cm"
-                />
-              </div>
+        {/* Historia Médica */}
+        <div className="mb-8">
+          <h4 className="text-lg font-medium text-gray-800 mb-4 border-b pb-2">📋 Historia Médica</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Enfermedad Actual</label>
+              <textarea
+                value={formData.medicalHistory.presentIllness}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  medicalHistory: { ...formData.medicalHistory, presentIllness: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Describa la enfermedad actual..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Antecedentes Médicos</label>
+              <textarea
+                value={formData.medicalHistory.pastMedicalHistory}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  medicalHistory: { ...formData.medicalHistory, pastMedicalHistory: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Enfermedades previas, cirugías..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Alergias</label>
+              <textarea
+                value={formData.medicalHistory.allergies}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  medicalHistory: { ...formData.medicalHistory, allergies: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={2}
+                placeholder="Alergias conocidas..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Medicamentos</label>
+              <textarea
+                value={formData.medicalHistory.medications}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  medicalHistory: { ...formData.medicalHistory, medications: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={2}
+                placeholder="Medicamentos actuales..."
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Historia Familiar</label>
+              <textarea
+                value={formData.medicalHistory.familyHistory}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  medicalHistory: { ...formData.medicalHistory, familyHistory: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={2}
+                placeholder="Enfermedades en la familia..."
+              />
             </div>
           </div>
+        </div>
 
-          {/* Diagnóstico y tratamiento */}
-          <div className="md:col-span-2">
-            <h4 className="text-md font-medium text-gray-800 mb-3">Diagnóstico y Tratamiento</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Diagnóstico
-                </label>
-                <textarea
-                  value={formData.diagnosis}
-                  onChange={(e) => setFormData({...formData, diagnosis: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Diagnóstico provisional..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Plan de Tratamiento
-                </label>
-                <textarea
-                  value={formData.treatment_plan}
-                  onChange={(e) => setFormData({...formData, treatment_plan: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Tratamiento recomendado..."
-                />
-              </div>
+        {/* Signos Vitales */}
+        <div className="mb-8">
+          <h4 className="text-lg font-medium text-gray-800 mb-4 border-b pb-2">💓 Signos Vitales</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Presión Arterial</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.bloodPressure}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, bloodPressure: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="120/80"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia Cardíaca</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.heartRate}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, heartRate: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="72 bpm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia Respiratoria</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.respiratoryRate}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, respiratoryRate: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="16 rpm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Temperatura</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.temperature}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, temperature: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="36.5°C"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Saturación de Oxígeno</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.oxygenSaturation}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, oxygenSaturation: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="98%"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Peso</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.weight}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, weight: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="70 kg"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Altura</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.height}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, height: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="170 cm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">IMC</label>
+              <input
+                type="text"
+                value={formData.vitalSigns.bmi}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  vitalSigns: { ...formData.vitalSigns, bmi: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="24.2"
+              />
             </div>
           </div>
+        </div>
 
-          {/* Recomendaciones y notas */}
-          <div className="md:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Recomendaciones
-                </label>
-                <textarea
-                  value={formData.recommendations}
-                  onChange={(e) => setFormData({...formData, recommendations: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Recomendaciones para el paciente..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notas Adicionales
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Notas adicionales..."
-                />
-              </div>
+        {/* Diagnóstico y Tratamiento */}
+        <div className="mb-8">
+          <h4 className="text-lg font-medium text-gray-800 mb-4 border-b pb-2">🔬 Diagnóstico y Tratamiento</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Diagnóstico</label>
+              <textarea
+                value={formData.diagnosis}
+                onChange={(e) => setFormData({...formData, diagnosis: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Diagnóstico provisional..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Plan de Tratamiento</label>
+              <textarea
+                value={formData.treatmentPlan}
+                onChange={(e) => setFormData({...formData, treatmentPlan: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Tratamiento recomendado..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Recomendaciones</label>
+              <textarea
+                value={formData.recommendations}
+                onChange={(e) => setFormData({...formData, recommendations: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Recomendaciones para el paciente..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Seguimiento</label>
+              <textarea
+                value={formData.followUp}
+                onChange={(e) => setFormData({...formData, followUp: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                placeholder="Plan de seguimiento..."
+              />
             </div>
           </div>
         </div>
