@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, Save, Mic, FileText, User, Baby } from 'lucide-react';
+import { ArrowLeft, Save, Mic, FileText, User, Baby, Brain, AlertCircle } from 'lucide-react';
 import AudioRecorder from './AudioRecorder';
 import TranscriptionResults from './TranscriptionResults';
 import { useConsultations } from '../hooks/useSupabase';
+import { analyzeFormData, type AIAnalysisResult } from '../utils/aiAnalysis';
 
 interface UnifiedConsultationFormProps {
   patient?: any;
@@ -15,9 +16,11 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
   onComplete,
   onBack
 }) => {
-  const [currentStep, setCurrentStep] = useState<'patient' | 'recording' | 'form' | 'complete'>('patient');
+  const [currentStep, setCurrentStep] = useState<'patient' | 'recording' | 'form' | 'analysis' | 'complete'>('patient');
   const [useRecording, setUseRecording] = useState<boolean>(false);
   const [transcriptionData, setTranscriptionData] = useState<any>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [formData, setFormData] = useState({
     // Datos del paciente
     patient_id: patient?.id || '',
@@ -87,22 +90,32 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
 
   const handleFormSubmit = useCallback(async () => {
     try {
+      // Generar folio para la consulta
+      const folio = `CONS-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Date.now().toString().slice(-6)}`;
+      
       const consultationData = {
         patient_id: formData.patient_id,
-        consultation_type: formData.consultation_type,
-        main_symptoms: formData.main_symptoms,
-        symptom_duration: formData.symptom_duration,
-        symptom_severity: formData.symptom_severity,
-        medical_history: formData.medical_history,
-        current_medications: formData.current_medications,
-        allergies: formData.allergies,
-        vital_signs: formData.vital_signs,
-        diagnosis: formData.diagnosis,
-        treatment_plan: formData.treatment_plan,
-        recommendations: formData.recommendations,
-        notes: formData.notes,
+        folio,
+        form_type: formData.consultation_type,
+        flow_type: 'complete',
+        chief_complaint: formData.main_symptoms,
+        symptoms: formData.main_symptoms ? [formData.main_symptoms] : [],
+        medications: formData.current_medications ? [formData.current_medications] : [],
+        observations: formData.notes,
         transcription: formData.transcription,
-        ai_analysis: formData.ai_analysis,
+        ai_analysis: aiAnalysis ? JSON.stringify(aiAnalysis) : null,
+        extracted_data: {
+          symptom_duration: formData.symptom_duration,
+          symptom_severity: formData.symptom_severity,
+          medical_history: formData.medical_history,
+          allergies: formData.allergies,
+          vital_signs: formData.vital_signs,
+          diagnosis: formData.diagnosis,
+          treatment_plan: formData.treatment_plan,
+          recommendations: formData.recommendations
+        },
+        elapsed_time: 0,
+        estimated_time: 15,
         status: 'completed'
       };
 
@@ -110,8 +123,23 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
       setCurrentStep('complete');
     } catch (error) {
       console.error('Error guardando consulta:', error);
+      alert('Error guardando consulta: ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
-  }, [formData, createConsultation]);
+  }, [formData, aiAnalysis, createConsultation]);
+
+  const handleAnalyzeWithAI = useCallback(async () => {
+    setIsAnalyzing(true);
+    try {
+      const analysis = await analyzeFormData(formData);
+      setAiAnalysis(analysis);
+      setCurrentStep('analysis');
+    } catch (error) {
+      console.error('Error en análisis de IA:', error);
+      alert('Error en análisis de IA: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [formData]);
 
   const renderPatientStep = () => (
     <div className="bg-white rounded-lg shadow p-6">
@@ -520,6 +548,14 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
 
         <div className="flex gap-3 mt-6">
           <button
+            onClick={handleAnalyzeWithAI}
+            disabled={loading || isAnalyzing}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
+          >
+            <Brain className="w-4 h-4" />
+            {isAnalyzing ? 'Analizando...' : 'Analizar con IA'}
+          </button>
+          <button
             onClick={handleFormSubmit}
             disabled={loading}
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
@@ -532,6 +568,96 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
             className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
           >
             Volver a Grabación
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAnalysisStep = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Brain className="w-6 h-6 text-purple-600" />
+          <h3 className="text-lg font-medium text-gray-900">Análisis de IA</h3>
+        </div>
+        
+        {aiAnalysis ? (
+          <div className="space-y-4">
+            {/* Resumen Clínico */}
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">📋 Resumen Clínico</h4>
+              <p className="text-blue-800">{aiAnalysis.resumen_clinico}</p>
+            </div>
+
+            {/* Posibles Relaciones */}
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="font-medium text-green-900 mb-2">🔗 Posibles Relaciones</h4>
+              <p className="text-green-800">{aiAnalysis.posibles_relaciones}</p>
+            </div>
+
+            {/* Sugerencias Diagnósticas */}
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h4 className="font-medium text-yellow-900 mb-2">🔍 Sugerencias Diagnósticas</h4>
+              <ul className="list-disc list-inside text-yellow-800">
+                {aiAnalysis.sugerencias_diagnosticas.map((sugerencia, index) => (
+                  <li key={index}>{sugerencia}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Recomendaciones Nutricionales */}
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h4 className="font-medium text-purple-900 mb-2">🥗 Recomendaciones Nutricionales</h4>
+              <div className="space-y-2">
+                {aiAnalysis.recomendaciones_nutricionales.map((rec, index) => (
+                  <div key={index} className="bg-white p-3 rounded border">
+                    <p className="font-medium text-purple-800">{rec.nutriente}</p>
+                    <p className="text-sm text-purple-700">{rec.justificacion}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recomendaciones de Estilo de Vida */}
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <h4 className="font-medium text-orange-900 mb-2">🏃 Recomendaciones de Estilo de Vida</h4>
+              <ul className="list-disc list-inside text-orange-800">
+                {aiAnalysis.recomendaciones_estilo_vida.map((rec, index) => (
+                  <li key={index}>{rec}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="bg-red-50 p-4 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                <p className="text-sm text-red-800">{aiAnalysis.disclaimer}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Analizando datos con IA...</p>
+          </div>
+        )}
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={handleFormSubmit}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+          >
+            <Save className="w-4 h-4" />
+            {loading ? 'Guardando...' : 'Guardar Consulta'}
+          </button>
+          <button
+            onClick={() => setCurrentStep('form')}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+          >
+            Volver al Formulario
           </button>
         </div>
       </div>
@@ -590,8 +716,11 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
           <span className={`px-2 py-1 rounded ${currentStep === 'form' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
             {useRecording ? '3. Formulario' : '2. Formulario'}
           </span>
+          <span className={`px-2 py-1 rounded ${currentStep === 'analysis' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
+            {useRecording ? '4. Análisis IA' : '3. Análisis IA'}
+          </span>
           <span className={`px-2 py-1 rounded ${currentStep === 'complete' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
-            {useRecording ? '4. Completado' : '3. Completado'}
+            {useRecording ? '5. Completado' : '4. Completado'}
           </span>
         </div>
       </div>
@@ -600,6 +729,7 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
       {currentStep === 'patient' && renderPatientStep()}
       {currentStep === 'recording' && renderRecordingStep()}
       {currentStep === 'form' && renderFormStep()}
+      {currentStep === 'analysis' && renderAnalysisStep()}
       {currentStep === 'complete' && renderCompleteStep()}
     </div>
   );
