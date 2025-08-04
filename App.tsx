@@ -150,7 +150,7 @@ const App: React.FC = () => {
   const [folioCounter, setFolioCounter] = useState(1001); // Initial folio number
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] =useState<boolean>(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase' | 'diagnostic'>('diagnostic');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase' | 'diagnostic'>('smart');
 
   // 🧪 Paciente de prueba para Smart Flow
   const testPatient = {

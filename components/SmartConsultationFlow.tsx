@@ -315,59 +315,7 @@ const SmartConsultationFlow: React.FC<SmartConsultationFlowProps> = ({
           </div>
         );
         
-      case 'analysis':
-        return (
-          <div className="space-y-6">
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Brain className="w-6 h-6 text-purple-600" />
-                <h3 className="text-lg font-semibold text-purple-800">
-                  Análisis Inteligente con IA
-                </h3>
-              </div>
-              
-              {transcriptionData ? (
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg border border-purple-200">
-                    <h4 className="font-medium text-gray-900 mb-2">📝 Transcripción</h4>
-                    <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded">
-                      {transcriptionData.transcription}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white p-4 rounded-lg border border-purple-200">
-                    <h4 className="font-medium text-gray-900 mb-2">🤖 Análisis IA</h4>
-                    <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded">
-                      {transcriptionData.analysis}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="font-medium text-green-800">Datos Extraídos</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="bg-white p-2 rounded">
-                        <span className="font-medium">Síntomas:</span> {extractDataFromTranscription(transcriptionData.transcription, transcriptionData.analysis).symptoms?.join(', ') || 'No detectados'}
-                      </div>
-                      <div className="bg-white p-2 rounded">
-                        <span className="font-medium">Medicamentos:</span> {extractDataFromTranscription(transcriptionData.transcription, transcriptionData.analysis).medications?.join(', ') || 'No detectados'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Brain className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                  <p className="text-gray-600">
-                    El análisis de IA se realizará automáticamente después de la grabación
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
+
         
       case 'form':
         return (
