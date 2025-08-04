@@ -151,7 +151,7 @@ const App: React.FC = () => {
   const [folioCounter, setFolioCounter] = useState(1001); // Initial folio number
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] =useState<boolean>(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase' | 'diagnostic'>('diagnostic');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase' | 'diagnostic'>('smart');
 
   // 🧪 Paciente de prueba para Smart Flow
   const testPatient = {
@@ -478,12 +478,138 @@ const App: React.FC = () => {
 
     return (
     <div className="min-h-screen bg-gray-50">
+      {/* 🚨 MANEJADOR DE ERRORES */}
+      {error && (
+        <div className="fixed inset-0 bg-red-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Error en la aplicación</h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={clearError}
+              className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
       <Navigation currentView={currentView} onViewChange={setCurrentView} />
       
-      {currentView === 'supabase' ? (
+      {currentView === 'dashboard' ? (
+        <PatientDashboard 
+          onNavigateToOptimized={() => setCurrentView('optimized')}
+          onNavigateToForms={() => setCurrentView('forms')}
+        />
+      ) : currentView === 'optimized' ? (
+        <OptimizedConsultationFlow
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting}
+          onReset={handleReset}
+        />
+      ) : currentView === 'smart' ? (
+        <SmartConsultationFlow
+          patient={testPatient}
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting}
+          onReset={handleReset}
+        />
+      ) : currentView === 'supabase' ? (
         <SupabaseExample />
+      ) : currentView === 'diagnostic' ? (
+        <DiagnosticView />
       ) : (
-        <SimpleFallback />
+        <>
+          {isSubmitted ? (
+            <PostSubmissionDashboard
+              folio={lastSubmittedData?.folio}
+              onReset={handleReset}
+              onExportPDF={handleExportPDF}
+              isGeneratingPdf={isGeneratingPdf}
+              hasDataToExport={!!lastSubmittedData}
+              onAnalyze={handleAiAnalysis}
+              isAnalyzing={isAnalyzing}
+              analysisResult={aiAnalysisResult}
+              processedWithAI={lastSubmittedData?.processedWithAI}
+              onSaveNote={handleSaveNote}
+              onSaveAnnotations={handleSaveAnnotations}
+              onShowFolioStats={handleShowFolioStats}
+              error={error}
+            />
+          ) : (
+            <div className="w-11/12 max-w-4xl mx-auto my-10 p-6 sm:p-10 bg-white rounded-2xl shadow-xl border border-gray-200/80">
+              <h1 className="text-center mb-8 font-extrabold text-3xl md:text-4xl bg-gradient-to-r from-blue-600 to-violet-500 text-transparent bg-clip-text tracking-tight">
+                Sistema de Consulta Médica Integral
+              </h1>
+              
+              <FormSelector selectedType={formType} onSelect={setFormType} />
+              
+              {formType === 'adulto' && (
+                <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-3">Tipo de Formulario</h3>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="adultFormType"
+                        checked={!useCompleteForm}
+                        onChange={() => setUseCompleteForm(false)}
+                        className="text-blue-600"
+                      />
+                      <span className="text-gray-700">Formulario Básico</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="adultFormType"
+                        checked={useCompleteForm}
+                        onChange={() => setUseCompleteForm(true)}
+                        className="text-blue-600"
+                      />
+                      <span className="text-gray-700">Historia Clínica Completa</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+              
+              {formType === 'pediatrico' && (
+                <div className="mb-6 p-4 bg-green-50 rounded-lg">
+                  <h3 className="text-lg font-semibold text-green-800 mb-3">Tipo de Formulario Pediátrico</h3>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="pediatricFormType"
+                        checked={!useCompletePediatricForm}
+                        onChange={() => setUseCompletePediatricForm(false)}
+                        className="text-green-600"
+                      />
+                      <span className="text-gray-700">Formulario Básico</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="pediatricFormType"
+                        checked={useCompletePediatricForm}
+                        onChange={() => setUseCompletePediatricForm(true)}
+                        className="text-green-600"
+                      />
+                      <span className="text-gray-700">Historia Clínica Completa</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+              
+              {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">{error}</div>}
+              
+              {formType === 'adulto' && !useCompleteForm && <BasicForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="adulto" />}
+              {formType === 'adulto' && useCompleteForm && <CompleteForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="adulto" />}
+              {formType === 'pediatrico' && !useCompletePediatricForm && <BasicForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="pediatrico" />}
+              {formType === 'pediatrico' && useCompletePediatricForm && <CompleteForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="pediatrico" />}
+              {formType === 'evolucion' && <EvolutionNote onSubmit={handleFormSubmit} isSubmitting={isSubmitting} />}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
