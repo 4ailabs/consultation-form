@@ -16,6 +16,7 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
   onBack
 }) => {
   const [currentStep, setCurrentStep] = useState<'patient' | 'recording' | 'form' | 'complete'>('patient');
+  const [useRecording, setUseRecording] = useState<boolean>(false);
   const [transcriptionData, setTranscriptionData] = useState<any>(null);
   const [formData, setFormData] = useState({
     // Datos del paciente
@@ -152,13 +153,52 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
         </div>
       </div>
 
+      {/* Opciones de flujo */}
+      <div className="mb-6">
+        <h4 className="text-md font-medium text-gray-800 mb-3">¿Cómo quieres proceder?</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            onClick={() => {
+              setUseRecording(false);
+              setCurrentStep('form');
+            }}
+            className="flex flex-col items-center p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          >
+            <FileText className="w-8 h-8 text-gray-600 mb-2" />
+            <span className="font-medium text-gray-900">Solo Formulario</span>
+            <span className="text-sm text-gray-600">Llenar manualmente</span>
+          </button>
+          
+          <button
+            onClick={() => {
+              setUseRecording(true);
+              setCurrentStep('recording');
+            }}
+            className="flex flex-col items-center p-4 border-2 border-gray-300 rounded-lg hover:border-red-500 hover:bg-red-50 transition-colors"
+          >
+            <Mic className="w-8 h-8 text-gray-600 mb-2" />
+            <span className="font-medium text-gray-900">Solo Grabación</span>
+            <span className="text-sm text-gray-600">Transcripción automática</span>
+          </button>
+          
+          <button
+            onClick={() => {
+              setUseRecording(true);
+              setCurrentStep('recording');
+            }}
+            className="flex flex-col items-center p-4 border-2 border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
+          >
+            <div className="flex gap-1 mb-2">
+              <Mic className="w-6 h-6 text-gray-600" />
+              <FileText className="w-6 h-6 text-gray-600" />
+            </div>
+            <span className="font-medium text-gray-900">Grabación + Formulario</span>
+            <span className="text-sm text-gray-600">Combinar ambos</span>
+          </button>
+        </div>
+      </div>
+
       <div className="flex gap-3">
-        <button
-          onClick={() => setCurrentStep('recording')}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          Continuar a Grabación
-        </button>
         <button
           onClick={onBack}
           className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
@@ -172,7 +212,15 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
   const renderRecordingStep = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Grabación de la Consulta</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Grabación de la Consulta</h3>
+          <button
+            onClick={() => setCurrentStep('form')}
+            className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+          >
+            Saltar Grabación
+          </button>
+        </div>
         <p className="text-gray-600 mb-4">
           Graba la consulta para obtener una transcripción automática y análisis con IA.
         </p>
@@ -187,6 +235,27 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
             analysis={transcriptionData.analysis}
             onUseTranscription={() => setCurrentStep('form')}
           />
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={() => setCurrentStep('form')}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Continuar al Formulario
+            </button>
+            <button
+              onClick={() => {
+                // Si solo queríamos grabación, guardar directamente
+                if (!useRecording) {
+                  handleFormSubmit();
+                } else {
+                  setCurrentStep('form');
+                }
+              }}
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Guardar Solo Transcripción
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -194,6 +263,25 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
 
   const renderFormStep = () => (
     <div className="space-y-6">
+      {/* Mostrar transcripción si existe */}
+      {transcriptionData && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-blue-900 mb-2">📝 Transcripción Disponible</h4>
+          <p className="text-sm text-blue-800 mb-2">
+            Se ha generado una transcripción automática de la grabación. 
+            Puedes usarla como referencia para llenar el formulario.
+          </p>
+          <details className="text-sm">
+            <summary className="cursor-pointer text-blue-700 hover:text-blue-900">
+              Ver transcripción completa
+            </summary>
+            <div className="mt-2 p-3 bg-white rounded border">
+              <p className="text-gray-800 whitespace-pre-wrap">{transcriptionData.transcription}</p>
+            </div>
+          </details>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Formulario de Consulta</h3>
         
@@ -494,14 +582,16 @@ const UnifiedConsultationForm: React.FC<UnifiedConsultationFormProps> = ({
           <span className={`px-2 py-1 rounded ${currentStep === 'patient' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
             1. Paciente
           </span>
-          <span className={`px-2 py-1 rounded ${currentStep === 'recording' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
-            2. Grabación
-          </span>
+          {useRecording && (
+            <span className={`px-2 py-1 rounded ${currentStep === 'recording' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
+              2. Grabación
+            </span>
+          )}
           <span className={`px-2 py-1 rounded ${currentStep === 'form' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
-            3. Formulario
+            {useRecording ? '3. Formulario' : '2. Formulario'}
           </span>
           <span className={`px-2 py-1 rounded ${currentStep === 'complete' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>
-            4. Completado
+            {useRecording ? '4. Completado' : '3. Completado'}
           </span>
         </div>
       </div>
