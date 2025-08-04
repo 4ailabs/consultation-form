@@ -13,7 +13,7 @@ import {
   CheckCircle,
   TrendingUp
 } from 'lucide-react';
-import SystemMetrics from './SystemMetrics';
+// import SystemMetrics from './SystemMetrics'; // Removido temporalmente
 import { usePatients, useConsultations } from '../hooks/useSupabase';
 
 interface Patient {
@@ -48,7 +48,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'patients' | 'consultations' | 'reports'>('dashboard');
-  const [showMetrics, setShowMetrics] = useState(false);
+  // const [showMetrics, setShowMetrics] = useState(false); // Removido temporalmente
 
   // Conectar con Supabase
   const { patients: supabasePatients, loading: patientsLoading } = usePatients();
@@ -136,13 +136,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
               <p className="text-sm text-gray-600">Optimizando el trabajo médico con IA</p>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowMetrics(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                <BarChart3 className="w-4 h-4" />
-                Métricas
-              </button>
+              {/* Botón de métricas removido temporalmente */}
             </div>
           </div>
         </div>
@@ -482,14 +476,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
         )}
       </div>
 
-      {/* Metrics Modal */}
-      {showMetrics && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <SystemMetrics onClose={() => setShowMetrics(false)} />
-          </div>
-        </div>
-      )}
+      {/* Metrics Modal - Removido temporalmente */}
     </div>
   );
 };
