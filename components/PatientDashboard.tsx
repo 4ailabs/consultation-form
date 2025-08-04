@@ -143,20 +143,6 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 <BarChart3 className="w-4 h-4" />
                 Métricas
               </button>
-              <button
-                onClick={handleQuickRecord}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                <Mic className="w-4 h-4" />
-                Grabación Rápida
-              </button>
-              <button
-                onClick={() => handleNewConsultation()}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Nueva Consulta
-              </button>
             </div>
           </div>
         </div>
@@ -167,17 +153,17 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+              { id: 'dashboard', label: 'Dashboard', icon: TrendingUp },
               { id: 'patients', label: 'Pacientes', icon: Users },
               { id: 'consultations', label: 'Consultas', icon: FileText },
-              { id: 'reports', label: 'Reportes', icon: TrendingUp }
+              { id: 'reports', label: 'Reportes', icon: BarChart3 }
             ].map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -339,48 +325,49 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 ) : (
                   <div className="space-y-4">
                     {patients.slice(0, 5).map((patient) => (
-                    <div
-                      key={patient.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => handlePatientSelect(patient)}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-600">
-                            {patient.fullName.split(' ').map(n => n[0]).join('')}
+                      <div
+                        key={patient.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => handlePatientSelect(patient)}
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-600">
+                              {patient.fullName.split(' ').map(n => n[0]).join('')}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{patient.fullName}</p>
+                            <p className="text-sm text-gray-500">
+                              {patient.folio} • {patient.age} años • {patient.gender}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            patient.status === 'active' 
+                              ? 'bg-green-100 text-green-800' 
+                              : patient.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {patient.status === 'active' ? 'Activo' : 
+                             patient.status === 'pending' ? 'Pendiente' : 'Inactivo'}
                           </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{patient.fullName}</p>
-                          <p className="text-sm text-gray-500">
-                            {patient.folio} • {patient.age} años • {patient.gender}
-                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleNewConsultation(patient);
+                            }}
+                            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                          >
+                            Consulta
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          patient.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : patient.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {patient.status === 'active' ? 'Activo' : 
-                           patient.status === 'pending' ? 'Pendiente' : 'Inactivo'}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleNewConsultation(patient);
-                          }}
-                          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                        >
-                          Consulta
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
