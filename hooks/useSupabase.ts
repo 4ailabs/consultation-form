@@ -70,6 +70,20 @@ export const usePatients = () => {
     }
   }, []);
 
+  const deletePatient = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await patientService.delete(id);
+      setPatients(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error eliminando paciente');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
@@ -81,7 +95,8 @@ export const usePatients = () => {
     fetchPatients,
     searchPatients,
     createPatient,
-    updatePatient
+    updatePatient,
+    deletePatient
   };
 };
 
@@ -161,6 +176,20 @@ export const useConsultations = () => {
     }
   }, []);
 
+  const deleteConsultation = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await consultationService.delete(id);
+      setConsultations(prev => prev.filter(c => c.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error eliminando consulta');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchConsultations();
   }, [fetchConsultations]);
@@ -173,7 +202,8 @@ export const useConsultations = () => {
     getConsultationsByPatient,
     createConsultation,
     updateConsultation,
-    getStats
+    getStats,
+    deleteConsultation
   };
 };
 

@@ -139,6 +139,19 @@ export const patientService = {
     }
 
     return data;
+  },
+
+  // Eliminar paciente
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('patients')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error eliminando paciente:', error);
+      throw error;
+    }
   }
 };
 
@@ -263,6 +276,19 @@ export const consultationService = {
     };
 
     return stats;
+  },
+
+  // Eliminar consulta
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('consultations')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error eliminando consulta:', error);
+      throw error;
+    }
   }
 };
 

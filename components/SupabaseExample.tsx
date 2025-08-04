@@ -3,8 +3,8 @@ import { usePatients, useConsultations } from '../hooks/useSupabase';
 import { utils } from '../utils/supabase';
 
 const SupabaseExample: React.FC = () => {
-  const { patients, loading: patientsLoading, createPatient, searchPatients } = usePatients();
-  const { consultations, loading: consultationsLoading, createConsultation, getStats } = useConsultations();
+  const { patients, loading: patientsLoading, createPatient, searchPatients, deletePatient } = usePatients();
+  const { consultations, loading: consultationsLoading, createConsultation, getStats, deleteConsultation } = useConsultations();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState<any>(null);
@@ -79,6 +79,32 @@ const SupabaseExample: React.FC = () => {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       searchPatients(searchQuery);
+    }
+  };
+
+  // 🗑️ ELIMINAR PACIENTE
+  const handleDeletePatient = async (id: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este paciente? Esta acción no se puede deshacer.')) {
+      try {
+        await deletePatient(id);
+        console.log('✅ Paciente eliminado');
+      } catch (error) {
+        console.error('❌ Error eliminando paciente:', error);
+        alert('Error eliminando paciente');
+      }
+    }
+  };
+
+  // 🗑️ ELIMINAR CONSULTA
+  const handleDeleteConsultation = async (id: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta consulta? Esta acción no se puede deshacer.')) {
+      try {
+        await deleteConsultation(id);
+        console.log('✅ Consulta eliminada');
+      } catch (error) {
+        console.error('❌ Error eliminando consulta:', error);
+        alert('Error eliminando consulta');
+      }
     }
   };
 
@@ -220,6 +246,9 @@ const SupabaseExample: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Fecha
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -239,6 +268,15 @@ const SupabaseExample: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(patient.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleDeletePatient(patient.id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                        title="Eliminar paciente"
+                      >
+                        🗑️ Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -284,6 +322,9 @@ const SupabaseExample: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Fecha
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -324,6 +365,15 @@ const SupabaseExample: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(consultation.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleDeleteConsultation(consultation.id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                        title="Eliminar consulta"
+                      >
+                        🗑️ Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))}
