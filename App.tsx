@@ -11,14 +11,15 @@ import PatientDashboard from './components/PatientDashboard';
 import OptimizedConsultationFlow from './components/OptimizedConsultationFlow';
 import SmartConsultationFlow from './components/SmartConsultationFlow';
 import SupabaseExample from './components/SupabaseExample';
+import DiagnosticView from './components/DiagnosticView';
 import { generateFolio, generateFolioWithPatientInfo, getFolioStats } from './utils/folioGenerator';
 import { generateEvolutionNotePDF, generateCompleteHistoryPDF } from './utils/pdfGenerator';
 
 // --- Helper Components ---
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase';
-  onViewChange: (view: 'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase') => void;
+  currentView: 'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase' | 'diagnostic';
+  onViewChange: (view: 'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase' | 'diagnostic') => void;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ currentView, onViewChange }) => {
@@ -86,6 +87,16 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, onViewChange }) =>
                 <Database className="w-4 h-4 mr-2" />
                 Supabase
               </button>
+              <button
+                onClick={() => onViewChange('diagnostic')}
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  currentView === 'diagnostic'
+                    ? 'border-blue-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                🔧 Diagnóstico
+              </button>
             </nav>
           </div>
         </div>
@@ -139,7 +150,7 @@ const App: React.FC = () => {
   const [folioCounter, setFolioCounter] = useState(1001); // Initial folio number
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] =useState<boolean>(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase'>('smart');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase' | 'diagnostic'>('diagnostic');
 
   // 🧪 Paciente de prueba para Smart Flow
   const testPatient = {
@@ -452,9 +463,36 @@ const App: React.FC = () => {
     alert(message);
   }, []);
 
+  // 🎯 MANEJAR ERRORES
+  const handleError = useCallback((error: any) => {
+    console.error('Error en la aplicación:', error);
+    setError(error.message || 'Error desconocido');
+  }, []);
+
+  // 🧹 LIMPIAR ERROR
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 🚨 MANEJADOR DE ERRORES */}
+      {error && (
+        <div className="fixed inset-0 bg-red-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Error en la aplicación</h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={clearError}
+              className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
       <Navigation currentView={currentView} onViewChange={setCurrentView} />
       
       {currentView === 'dashboard' ? (
@@ -477,6 +515,8 @@ const App: React.FC = () => {
          />
       ) : currentView === 'supabase' ? (
         <SupabaseExample />
+      ) : currentView === 'diagnostic' ? (
+        <DiagnosticView />
       ) : (
         <>
            {isSubmitted ? (
