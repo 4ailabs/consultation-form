@@ -477,7 +477,15 @@ const App: React.FC = () => {
 
 
     return (
-    <SimpleFallback />
+    <div className="min-h-screen bg-gray-50">
+      <Navigation currentView={currentView} onViewChange={setCurrentView} />
+      
+      {currentView === 'supabase' ? (
+        <SupabaseExample />
+      ) : (
+        <SimpleFallback />
+      )}
+    </div>
   );
 };
 
