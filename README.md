@@ -1,240 +1,258 @@
 # 🏥 Sistema de Consulta Médica Integral
 
-Un sistema completo y moderno para la gestión de historias clínicas, formularios de consulta y notas de evolución médica.
+Un sistema completo de gestión de consultas médicas con inteligencia artificial, transcripción de audio, y base de datos en tiempo real.
 
 ## ✨ Características Principales
 
-### 📋 Formularios Disponibles
-- **👤 Formulario Adulto Básico** - Consulta rápida para pacientes adultos
-- **👤 Historia Clínica Completa Adulto** - Formulario exhaustivo con 7 secciones
-- **👶 Formulario Pediátrico Básico** - Consulta especializada para niños
-- **👶 Historia Clínica Completa Pediátrica** - Formulario completo con datos perinatales
-- **📋 Nota de Evolución** - Seguimiento rápido y eficiente
+### 🧠 **Smart Flow Inteligente**
+- Flujo de consulta adaptativo basado en el contexto del paciente
+- Análisis automático de síntomas y prioridades
+- Optimización de tiempo y recursos médicos
 
-### 🚀 Funcionalidades Avanzadas
-- **🎤 Grabación y Transcripción** - Grabación de audio con transcripción automática usando Google Speech-to-Text
-- **🤖 Análisis con IA** - Integración con Google Gemini para análisis clínico estructurado
-- **📄 Generación de PDF** - Reportes imprimibles automáticos
-- **💾 Auto-guardado** - Persistencia de datos en localStorage
-- **📱 Responsive Design** - Funciona perfectamente en móviles y desktop
-- **🎨 Interfaz Moderna** - Diseño limpio y profesional con Tailwind CSS
+### 🎙️ **Grabación y Transcripción**
+- Grabación de audio en tiempo real
+- Transcripción automática con Google Speech-to-Text
+- Análisis de IA con Gemini para extracción de datos médicos
 
-## 🛠️ Tecnologías Utilizadas
+### 🗄️ **Base de Datos Supabase**
+- Almacenamiento en tiempo real de pacientes y consultas
+- Búsqueda inteligente de historiales médicos
+- Estadísticas y reportes automáticos
 
-- **React 18** - Framework principal
-- **TypeScript** - Tipado estático
-- **Vite** - Build tool y dev server
-- **Tailwind CSS** - Framework de estilos
-- **Lucide React** - Iconos modernos
-- **jsPDF + html2canvas** - Generación de PDF
-- **Google Gemini AI** - Análisis inteligente
+### 📱 **Interfaz Moderna**
+- Diseño responsive y accesible
+- Navegación intuitiva entre diferentes flujos
+- Dashboard con métricas en tiempo real
 
-## 📦 Instalación
+## 🚀 Tecnologías Utilizadas
 
-### Prerrequisitos
+- **Frontend:** React + TypeScript + Vite
+- **UI:** Tailwind CSS + Lucide React
+- **Base de Datos:** Supabase (PostgreSQL)
+- **IA:** Google Gemini AI
+- **Transcripción:** Google Speech-to-Text
+- **Despliegue:** Vercel
+
+## 📋 Requisitos Previos
+
 - Node.js 18+ 
-- npm o yarn
+- Cuenta en [Supabase](https://supabase.com)
+- Cuenta en [Google Cloud](https://cloud.google.com) (para IA y transcripción)
+- Cuenta en [Vercel](https://vercel.com) (para despliegue)
 
-### Pasos de Instalación
+## 🛠️ Instalación Local
 
-1. **Clonar el repositorio**
+### 1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/4ailabs/consultation-form.git
-cd consultation-form
+git clone https://github.com/tu-usuario/comprehensive-consultation-form.git
+cd comprehensive-consultation-form
 ```
 
-2. **Instalar dependencias**
+### 2. **Instalar dependencias**
 ```bash
 npm install
 ```
 
-3. **Configurar variables de entorno**
+### 3. **Configurar variables de entorno**
 ```bash
-# Crear archivo .env.local
-echo "API_KEY=tu_clave_de_google_gemini" > .env.local
+cp .env.example .env
 ```
 
-4. **Ejecutar en desarrollo**
+Edita el archivo `.env` con tus credenciales:
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key-aqui
+
+# Google AI Configuration
+API_KEY=tu-google-ai-api-key
+```
+
+### 4. **Configurar Supabase**
+1. Ve a [supabase.com](https://supabase.com) y crea un proyecto
+2. Ejecuta el script SQL en el SQL Editor:
+   ```sql
+   -- Copia y pega el contenido de supabase-schema.sql
+   ```
+3. Copia las credenciales de Settings → API
+
+### 5. **Ejecutar en desarrollo**
 ```bash
 npm run dev
 ```
 
-5. **Abrir en el navegador**
-```
-http://localhost:5173
+La aplicación estará disponible en `http://localhost:5173`
+
+## 🗄️ Configuración de Supabase
+
+### **Estructura de la Base de Datos**
+
+#### **Tablas Principales:**
+- **`patients`** - Información de pacientes
+- **`consultations`** - Consultas médicas completas
+- **`smart_flow_data`** - Datos del flujo inteligente
+- **`system_stats`** - Estadísticas del sistema
+
+#### **Vistas Útiles:**
+- **`consultation_summary`** - Resumen de consultas con datos del paciente
+- **`consultation_stats`** - Estadísticas agregadas del sistema
+
+### **Ejecutar el Script SQL**
+1. Ve al SQL Editor en tu proyecto de Supabase
+2. Copia el contenido de `supabase-schema.sql`
+3. Ejecuta el script
+
+## 🚀 Despliegue en Vercel
+
+### **1. Preparar el repositorio**
+```bash
+# Asegúrate de que todos los cambios estén commitados
+git add .
+git commit -m "Preparar para despliegue en Vercel"
+git push origin main
 ```
 
-## 🏗️ Estructura del Proyecto
+### **2. Conectar con Vercel**
+1. Ve a [vercel.com](https://vercel.com)
+2. Importa tu repositorio de GitHub
+3. Configura las variables de entorno en Vercel:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `API_KEY`
+
+### **3. Configurar variables de entorno en Vercel**
+En el dashboard de Vercel, ve a Settings → Environment Variables:
+
+```env
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key-aqui
+API_KEY=tu-google-ai-api-key
+```
+
+### **4. Desplegar**
+Vercel detectará automáticamente que es un proyecto Vite y lo desplegará correctamente.
+
+## 📁 Estructura del Proyecto
 
 ```
 comprehensive-consultation-form/
-├── components/
-│   ├── common/
-│   │   ├── FormComponents.tsx    # Componentes reutilizables
-│   │   └── FormProgress.tsx      # Barra de progreso
-│   ├── AdultForm.tsx             # Formulario básico adulto
-│   ├── PediatricForm.tsx         # Formulario básico pediátrico
-│   ├── CompleteForm.tsx          # Historia clínica completa
-│   ├── EvolutionNote.tsx         # Nota de evolución
-│   ├── PostSubmissionDashboard.tsx # Dashboard post-envío
-│   └── PrintableReport.tsx       # Generación de PDF
-├── utils/
-│   ├── validation.ts             # Validaciones
-│   └── storage.ts                # Gestión de localStorage
-├── types.ts                      # Definiciones TypeScript
-├── App.tsx                       # Componente principal
-└── package.json
+├── components/                 # Componentes React
+│   ├── AudioRecorder.tsx      # Grabación de audio
+│   ├── SmartConsultationFlow.tsx # Flujo inteligente
+│   ├── PatientDashboard.tsx   # Dashboard de pacientes
+│   ├── SupabaseExample.tsx    # Ejemplo de Supabase
+│   └── ...
+├── utils/                     # Utilidades
+│   ├── supabase.ts           # Cliente y servicios de Supabase
+│   ├── smartFlow.ts          # Motor de decisiones inteligentes
+│   ├── folioGenerator.ts     # Generación de folios
+│   └── ...
+├── hooks/                     # Hooks personalizados
+│   └── useSupabase.ts        # Hooks para Supabase
+├── supabase-schema.sql       # Esquema de base de datos
+├── SUPABASE_SETUP.md         # Guía de configuración
+└── ...
 ```
 
-## 📋 Secciones del Formulario Completo
+## 🎯 Funcionalidades por Vista
 
-### Para Adultos (8 secciones):
-1. **Datos Personales** - Información básica y contacto
-2. **Motivo de Consulta** - Descripción del problema
-3. **🎤 Grabación de Sesión** - Grabación y transcripción de la consulta
-4. **Historia Clínica** - Antecedentes, alergias, vacunación
-5. **Revisión por Sistemas** - Cardiovascular, respiratorio, digestivo
-6. **Estilo de Vida** - Actividad física, nutrición, sueño, salud mental
-7. **Signos Vitales** - Presión arterial, temperatura, IMC
-8. **Exploración Física** - Examen físico completo
+### **🏠 Dashboard**
+- Vista general del sistema
+- Métricas en tiempo real
+- Acceso rápido a funciones principales
 
-### Para Pediátricos (9 secciones):
-1. **Datos Personales** - Información básica
-2. **Datos Perinatales** - Nacimiento, lactancia, desarrollo
-3. **Motivo de Consulta** - Descripción del problema
-4. **🎤 Grabación de Sesión** - Grabación y transcripción de la consulta
-5. **Historia Clínica** - Antecedentes y vacunación
-6. **Desarrollo y Crecimiento** - Hitos del desarrollo
-7. **Revisión por Sistemas** - Sistemas corporales
-8. **Signos Vitales** - Medidas antropométricas
-9. **Exploración Física** - Examen físico
+### **🧠 Smart Flow**
+- Flujo de consulta inteligente
+- Análisis automático de contexto
+- Optimización de tiempo y recursos
 
-## 🔧 Configuración
+### **📋 Formularios**
+- Formularios tradicionales
+- Validación en tiempo real
+- Generación de PDF
 
-### Variables de Entorno
-```env
-# Google Gemini AI (opcional)
-API_KEY=tu_clave_de_google_gemini
+### **🗄️ Supabase**
+- Gestión completa de pacientes
+- Consultas y estadísticas
+- Búsqueda inteligente
 
-# Webhook para envío de datos (opcional)
-WEBHOOK_URL=https://hook.us1.make.com/tu_webhook
-```
+## 🔧 Scripts Disponibles
 
-### Configuración del Backend de Transcripción
-
-Para usar la funcionalidad de grabación y transcripción, necesitas configurar el backend:
-
-1. **Configurar Google Cloud Speech-to-Text**:
-   - Habilitar API de Speech-to-Text
-   - Crear credenciales de servicio
-   - Configurar variables de entorno
-
-2. **Configurar Gemini AI**:
-   - Obtener API Key de Google AI Studio
-   - Configurar en variables de entorno
-
-3. **Ejecutar el backend**:
-   ```bash
-   cd ../clinica-transcripcion-backend
-   npm install
-   npm start
-   ```
-
-Ver [TRANSCRIPTION_SETUP.md](./TRANSCRIPTION_SETUP.md) para instrucciones detalladas.
-
-### Personalización
-- **Colores**: Editar `tailwind.config.js`
-- **Validaciones**: Modificar `utils/validation.ts`
-- **Campos**: Ajustar `types.ts` y componentes correspondientes
-
-## 🚀 Despliegue
-
-### Vercel (Recomendado)
-1. Conectar repositorio a Vercel
-2. Configurar variables de entorno
-3. Desplegar automáticamente
-
-### Netlify
-1. Conectar repositorio a Netlify
-2. Build command: `npm run build`
-3. Publish directory: `dist`
-
-### GitHub Pages
 ```bash
-npm run build
-# Subir contenido de dist/ a gh-pages
+npm run dev          # Desarrollo local
+npm run build        # Construir para producción
+npm run preview      # Vista previa de producción
+npm run lint         # Linting del código
 ```
 
-## 📊 Funcionalidades Avanzadas
+## 📊 API y Servicios
 
-### 🎤 Grabación y Transcripción
-- Grabación de audio en tiempo real
-- Transcripción automática con Google Speech-to-Text
-- Análisis estructurado específico para biomagnetismo
-- Auto-completado de campos del formulario
-- Soporte para múltiples formatos de audio
+### **Supabase Services**
+```typescript
+import { patientService, consultationService } from './utils/supabase';
 
-### 🤖 Análisis con IA
-- Resumen clínico automático
-- Sugerencias diagnósticas
-- Recomendaciones nutricionales
-- Análisis de estilo de vida
-- Análisis específico para consultas de biomagnetismo y bioenergética
+// Crear paciente
+const patient = await patientService.create({...});
 
-### 📄 Generación de PDF
-- Reportes profesionales
-- Incluye todos los datos del formulario
-- Formato médico estándar
-- Descarga automática
+// Crear consulta
+const consultation = await consultationService.create({...});
 
-### 💾 Persistencia de Datos
-- Auto-guardado cada 30 segundos
-- Restauración de datos perdidos
-- Exportación/importación de datos
-- Limpieza automática de datos expirados
+// Obtener estadísticas
+const stats = await consultationService.getStats();
+```
 
-## 🔒 Seguridad y Privacidad
+### **Hooks de React**
+```typescript
+import { usePatients, useConsultations } from './hooks/useSupabase';
 
-- **Datos locales**: Toda la información se mantiene en el navegador
-- **Sin servidor**: No se almacenan datos en servidores externos
-- **Cifrado**: Datos en localStorage con expiración
-- **GDPR/COPPA**: Cumple con regulaciones de privacidad
+function MyComponent() {
+  const { patients, createPatient } = usePatients();
+  const { consultations, getStats } = useConsultations();
+}
+```
+
+## 🔐 Seguridad
+
+- **Row Level Security (RLS)** habilitado en Supabase
+- Variables de entorno protegidas
+- Autenticación preparada para implementación
+- Validación de datos en frontend y backend
+
+## 📈 Monitoreo y Analytics
+
+- Estadísticas automáticas del sistema
+- Métricas de rendimiento
+- Logs de errores
+- Dashboard de administración
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
+5. Abre un Pull Request
 
 ## 📝 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
 ## 🆘 Soporte
 
-- **Issues**: [GitHub Issues](https://github.com/4ailabs/consultation-form/issues)
-- **Documentación**: [Wiki del proyecto](https://github.com/4ailabs/consultation-form/wiki)
-- **Contacto**: miguel@4ailabs.com
+Si tienes problemas:
 
-## 🗺️ Roadmap
+1. Revisa la documentación en `SUPABASE_SETUP.md`
+2. Verifica las variables de entorno
+3. Revisa los logs en la consola del navegador
+4. Abre un issue en GitHub
 
-### Próximas Funcionalidades
-- [ ] Base de datos local (IndexedDB)
-- [ ] Autenticación de usuarios
-- [ ] Sincronización con servidor
-- [ ] Búsqueda de pacientes
-- [ ] Notificaciones push
-- [ ] Modo offline completo
-- [ ] Tests unitarios e integración
-- [ ] Documentación técnica detallada
-- [ ] Internacionalización (i18n)
-- [ ] Temas personalizables
-- [ ] Integración con sistemas de salud
-- [ ] Cumplimiento HIPAA/GDPR
-- [ ] Auditoría de acceso
+## 🎉 Agradecimientos
+
+- [Supabase](https://supabase.com) por la infraestructura de base de datos
+- [Google AI](https://ai.google.dev/) por las capacidades de IA
+- [Vercel](https://vercel.com) por el hosting y despliegue
+- [Tailwind CSS](https://tailwindcss.com) por el framework de estilos
 
 ---
 
-**Desarrollado con ❤️ por [4AI Labs](https://4ailabs.com)**
+**¡Disfruta usando el Sistema de Consulta Médica Integral! 🏥✨**

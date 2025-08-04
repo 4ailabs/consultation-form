@@ -1,16 +1,98 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
-import { User, Baby, FileText } from 'lucide-react';
+import { User, Baby, FileText, LayoutDashboard, FileEdit, Brain, Database } from 'lucide-react';
 import { GoogleGenAI, Type } from "@google/genai";
 import type { FormType } from './types';
 import BasicForm from './components/BasicForm';
 import CompleteForm from './components/CompleteForm';
 import EvolutionNote from './components/EvolutionNote';
 import PostSubmissionDashboard from './components/PostSubmissionDashboard';
+import PatientDashboard from './components/PatientDashboard';
+import OptimizedConsultationFlow from './components/OptimizedConsultationFlow';
+import SmartConsultationFlow from './components/SmartConsultationFlow';
+import SupabaseExample from './components/SupabaseExample';
 import { generateFolio, generateFolioWithPatientInfo, getFolioStats } from './utils/folioGenerator';
 import { generateEvolutionNotePDF, generateCompleteHistoryPDF } from './utils/pdfGenerator';
 
 // --- Helper Components ---
+
+interface NavigationProps {
+  currentView: 'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase';
+  onViewChange: (view: 'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase') => void;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ currentView, onViewChange }) => {
+  return (
+    <div className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center">
+              <h1 className="text-xl font-bold text-gray-900">🏥 Sistema Médico</h1>
+            </div>
+            <nav className="ml-10 flex space-x-8">
+              <button
+                onClick={() => onViewChange('dashboard')}
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  currentView === 'dashboard'
+                    ? 'border-blue-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Dashboard
+              </button>
+              <button
+                onClick={() => onViewChange('forms')}
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  currentView === 'forms'
+                    ? 'border-blue-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <FileEdit className="w-4 h-4 mr-2" />
+                Formularios
+              </button>
+              <button
+                onClick={() => onViewChange('optimized')}
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  currentView === 'optimized'
+                    ? 'border-blue-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Brain className="w-4 h-4 mr-2" />
+                Optimizado
+              </button>
+              <button
+                onClick={() => onViewChange('smart')}
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  currentView === 'smart'
+                    ? 'border-blue-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Brain className="w-4 h-4 mr-2" />
+                Smart Flow
+              </button>
+              <button
+                onClick={() => onViewChange('supabase')}
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  currentView === 'supabase'
+                    ? 'border-blue-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Database className="w-4 h-4 mr-2" />
+                Supabase
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface FormSelectorProps {
   selectedType: FormType;
@@ -57,6 +139,25 @@ const App: React.FC = () => {
   const [folioCounter, setFolioCounter] = useState(1001); // Initial folio number
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] =useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<'dashboard' | 'forms' | 'optimized' | 'smart' | 'supabase'>('smart');
+
+  // 🧪 Paciente de prueba para Smart Flow
+  const testPatient = {
+    id: '1',
+    folio: 'HC-2024-001',
+    fullName: 'María González López',
+    age: 35,
+    gender: 'Femenino',
+    phone: '555-0123',
+    lastVisit: '2024-08-01',
+    nextAppointment: '2024-08-15',
+    status: 'active',
+    formType: 'adulto',
+    previousConsultations: 3,
+    symptoms: ['dolor de cabeza', 'fatiga'],
+    severity: 'moderado',
+    emergency: false
+  };
 
   const ai = useMemo(() => {
     // This assumes process.env.API_KEY is set in the execution environment
@@ -353,27 +454,49 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="w-11/12 max-w-4xl mx-auto my-10 p-6 sm:p-10 bg-white rounded-2xl shadow-xl border border-gray-200/80">
-      <h1 className="text-center mb-8 font-extrabold text-3xl md:text-4xl bg-gradient-to-r from-blue-600 to-violet-500 text-transparent bg-clip-text tracking-tight">Sistema de Consulta Médica Integral</h1>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation currentView={currentView} onViewChange={setCurrentView} />
       
-      {isSubmitted ? (
-        <PostSubmissionDashboard
-            folio={lastSubmittedData?.folio}
-            onReset={handleReset}
-            onExportPDF={handleExportPDF}
-            isGeneratingPdf={isGeneratingPdf}
-            hasDataToExport={!!lastSubmittedData}
-            onAnalyze={handleAiAnalysis}
-            isAnalyzing={isAnalyzing}
-            analysisResult={aiAnalysisResult}
-            processedWithAI={lastSubmittedData?.processedWithAI}
-            onSaveNote={handleSaveNote}
-            onSaveAnnotations={handleSaveAnnotations}
-            onShowFolioStats={handleShowFolioStats}
-            error={error}
+      {currentView === 'dashboard' ? (
+        <PatientDashboard 
+          onNavigateToOptimized={() => setCurrentView('optimized')}
+          onNavigateToForms={() => setCurrentView('forms')}
         />
+      ) : currentView === 'optimized' ? (
+        <OptimizedConsultationFlow 
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting}
+          onReset={handleReset}
+        />
+             ) : currentView === 'smart' ? (
+         <SmartConsultationFlow 
+           patient={testPatient}
+           onSubmit={handleFormSubmit}
+           isSubmitting={isSubmitting}
+           onReset={handleReset}
+         />
+      ) : currentView === 'supabase' ? (
+        <SupabaseExample />
       ) : (
         <>
+           {isSubmitted ? (
+             <PostSubmissionDashboard
+                 folio={lastSubmittedData?.folio}
+                 onReset={handleReset}
+                 onExportPDF={handleExportPDF}
+                 isGeneratingPdf={isGeneratingPdf}
+                 hasDataToExport={!!lastSubmittedData}
+                 onAnalyze={handleAiAnalysis}
+                 isAnalyzing={isAnalyzing}
+                 analysisResult={aiAnalysisResult}
+                 processedWithAI={lastSubmittedData?.processedWithAI}
+                 onSaveNote={handleSaveNote}
+                 onSaveAnnotations={handleSaveAnnotations}
+                 onShowFolioStats={handleShowFolioStats}
+                 error={error}
+             />
+           ) : (
+             <>
           <FormSelector selectedType={formType} onSelect={setFormType} />
           
           {formType === 'adulto' && (
@@ -434,13 +557,15 @@ const App: React.FC = () => {
           
           {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">{error}</div>}
           
-                          {formType === 'adulto' && !useCompleteForm && <BasicForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="adulto" />}
-                {formType === 'adulto' && useCompleteForm && <CompleteForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="adulto" />}
-                {formType === 'pediatrico' && !useCompletePediatricForm && <BasicForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="pediatrico" />}
-                {formType === 'pediatrico' && useCompletePediatricForm && <CompleteForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="pediatrico" />}
-                {formType === 'evolucion' && <EvolutionNote onSubmit={handleFormSubmit} isSubmitting={isSubmitting} />}
-        </>
-      )}
+          {formType === 'adulto' && !useCompleteForm && <BasicForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="adulto" />}
+          {formType === 'adulto' && useCompleteForm && <CompleteForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="adulto" />}
+          {formType === 'pediatrico' && !useCompletePediatricForm && <BasicForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="pediatrico" />}
+          {formType === 'pediatrico' && useCompletePediatricForm && <CompleteForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} formType="pediatrico" />}
+          {formType === 'evolucion' && <EvolutionNote onSubmit={handleFormSubmit} isSubmitting={isSubmitting} />}
+             </>
+           )}
+         </>
+       )}
     </div>
   );
 };
