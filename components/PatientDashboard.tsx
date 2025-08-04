@@ -37,13 +37,13 @@ interface DashboardStats {
 }
 
 interface PatientDashboardProps {
-  onNavigateToOptimized?: () => void;
-  onNavigateToForms?: () => void;
+  onNavigateToConsultation?: (patient?: any) => void;
+  onNavigateToPatients?: () => void;
 }
 
 const PatientDashboard: React.FC<PatientDashboardProps> = ({ 
-  onNavigateToOptimized, 
-  onNavigateToForms 
+  onNavigateToConsultation, 
+  onNavigateToPatients 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -106,20 +106,20 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
   );
 
   const handleNewConsultation = useCallback((patient?: Patient) => {
-    // Navegar al flujo optimizado
-    if (onNavigateToOptimized) {
-      onNavigateToOptimized();
+    // Navegar a nueva consulta
+    if (onNavigateToConsultation) {
+      onNavigateToConsultation(patient);
     }
     console.log('Nueva consulta para:', patient?.fullName || 'Nuevo paciente');
-  }, [onNavigateToOptimized]);
+  }, [onNavigateToConsultation]);
 
   const handleQuickRecord = useCallback(() => {
-    // Navegar al flujo optimizado con grabación rápida
-    if (onNavigateToOptimized) {
-      onNavigateToOptimized();
+    // Navegar a nueva consulta con grabación rápida
+    if (onNavigateToConsultation) {
+      onNavigateToConsultation();
     }
     console.log('Iniciando grabación rápida');
-  }, [onNavigateToOptimized]);
+  }, [onNavigateToConsultation]);
 
   const handlePatientSelect = useCallback((patient: Patient) => {
     setSelectedPatient(patient);
@@ -279,7 +279,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   </button>
 
                   <button
-                    onClick={() => setActiveTab('patients')}
+                    onClick={() => onNavigateToPatients && onNavigateToPatients()}
                     className="flex items-center justify-center gap-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
                   >
                     <Search className="w-6 h-6 text-gray-400" />
