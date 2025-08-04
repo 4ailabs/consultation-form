@@ -23,6 +23,8 @@ const PatientManagement: React.FC<PatientManagementProps> = ({
     deletePatient 
   } = usePatients();
 
+  const [isCreating, setIsCreating] = useState(false);
+
   // Formulario para crear/editar paciente
   const [formData, setFormData] = useState({
     full_name: '',
@@ -40,8 +42,27 @@ const PatientManagement: React.FC<PatientManagementProps> = ({
   );
 
   const handleCreatePatient = useCallback(async () => {
+    // Validar campos requeridos
+    if (!formData.full_name.trim()) {
+      alert('El nombre completo es requerido');
+      return;
+    }
+    if (!formData.age || parseInt(formData.age) <= 0) {
+      alert('La edad es requerida y debe ser mayor a 0');
+      return;
+    }
+    if (!formData.phone.trim()) {
+      alert('El teléfono es requerido');
+      return;
+    }
+
     try {
+      setIsCreating(true);
+      // Generar folio automáticamente
+      const folio = `HC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Date.now().toString().slice(-6)}`;
+      
       await createPatient({
+        folio,
         ...formData,
         age: parseInt(formData.age)
       });
@@ -54,8 +75,12 @@ const PatientManagement: React.FC<PatientManagementProps> = ({
         email: '',
         address: ''
       });
+      alert('Paciente creado exitosamente');
     } catch (error) {
       console.error('Error creando paciente:', error);
+      alert('Error creando paciente: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+    } finally {
+      setIsCreating(false);
     }
   }, [formData, createPatient]);
 
@@ -235,13 +260,15 @@ const PatientManagement: React.FC<PatientManagementProps> = ({
           <div className="flex gap-3 mt-6">
             <button
               onClick={editingPatient ? handleUpdatePatient : handleCreatePatient}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              disabled={isCreating}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingPatient ? 'Actualizar' : 'Crear'}
+              {isCreating ? 'Creando...' : (editingPatient ? 'Actualizar' : 'Crear')}
             </button>
             <button
               onClick={handleCancelForm}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+              disabled={isCreating}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
