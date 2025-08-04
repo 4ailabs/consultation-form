@@ -17,6 +17,8 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
     transcription: string;
     analysis: string;
   } | null>(null);
+  const [quickRecordAudio, setQuickRecordAudio] = useState<Blob | null>(null);
+  const [quickRecordFileName, setQuickRecordFileName] = useState<string>('');
   const [formData, setFormData] = useState({
     personalData: {
       fullName: '',
@@ -621,6 +623,8 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
                 onTranscriptionComplete={handleTranscriptionComplete}
                 isRecording={isRecording}
                 setIsRecording={setIsRecording}
+                quickRecordAudio={quickRecordAudio}
+                quickRecordFileName={quickRecordFileName}
               />
               
               {transcriptionData && (
@@ -1221,15 +1225,16 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
                             }
                           };
                           
-                          mediaRecorder.onstop = () => {
-                            const blob = new Blob(chunks, { type: 'audio/webm' });
-                            const url = URL.createObjectURL(blob);
-                            setTranscriptionData({
-                              transcription: 'Audio grabado - Ve a la sección de grabación para transcribir',
-                              analysis: 'Audio disponible para transcripción'
-                            });
-                            stream.getTracks().forEach(track => track.stop());
-                          };
+                                                  mediaRecorder.onstop = () => {
+                          const blob = new Blob(chunks, { type: 'audio/webm' });
+                          setQuickRecordAudio(blob);
+                          setQuickRecordFileName('Audio grabado desde Quick Record');
+                          setTranscriptionData({
+                            transcription: 'Audio grabado - Ve a la sección de grabación para transcribir',
+                            analysis: 'Audio disponible para transcripción'
+                          });
+                          stream.getTracks().forEach(track => track.stop());
+                        };
                           
                           mediaRecorder.start();
                           setIsRecording(true);
@@ -1279,6 +1284,8 @@ const CompleteForm: React.FC<CompleteFormProps> = ({ onSubmit, isSubmitting, for
                             return;
                           }
 
+                          setQuickRecordAudio(file);
+                          setQuickRecordFileName(file.name);
                           setTranscriptionData({
                             transcription: `Archivo subido: ${file.name} - Ve a la sección de grabación para transcribir`,
                             analysis: 'Audio disponible para transcripción'

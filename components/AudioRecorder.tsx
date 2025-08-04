@@ -1,16 +1,20 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, Square, Play, Pause, Upload, Trash2, Loader2, FileAudio } from 'lucide-react';
 
 interface AudioRecorderProps {
   onTranscriptionComplete: (transcription: string, analysis: string) => void;
   isRecording: boolean;
   setIsRecording: (recording: boolean) => void;
+  quickRecordAudio?: Blob | null;
+  quickRecordFileName?: string;
 }
 
 const AudioRecorder: React.FC<AudioRecorderProps> = ({ 
   onTranscriptionComplete, 
   isRecording, 
-  setIsRecording 
+  setIsRecording,
+  quickRecordAudio,
+  quickRecordFileName
 }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -24,6 +28,8 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+
 
   // Función para limpiar todo el estado
   const clearAudio = useCallback(() => {
@@ -191,6 +197,32 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
       setIsUploading(false);
     }
   }, [audioBlob, uploadedFileName, onTranscriptionComplete]);
+
+  // Efecto para procesar audio del Quick Record automáticamente
+  useEffect(() => {
+    if (quickRecordAudio && !audioBlob) {
+      console.log('Audio del Quick Record detectado, procesando automáticamente...');
+      
+      // Limpiar audio anterior si existe
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+
+      // Configurar el audio del Quick Record
+      const url = URL.createObjectURL(quickRecordAudio);
+      setAudioBlob(quickRecordAudio);
+      setAudioUrl(url);
+      setUploadedFileName(quickRecordFileName || 'Audio del Quick Record');
+      setIsPlaying(false);
+      setRecordingTime(0);
+      setError(null);
+
+      // Procesar automáticamente después de un breve delay
+      setTimeout(() => {
+        uploadAudio();
+      }, 1000);
+    }
+  }, [quickRecordAudio, quickRecordFileName, audioBlob, audioUrl, uploadAudio]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
