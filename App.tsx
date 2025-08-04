@@ -539,7 +539,7 @@ const App: React.FC = () => {
           ) : (
             <div className="w-11/12 max-w-4xl mx-auto my-10 p-6 sm:p-10 bg-white rounded-2xl shadow-xl border border-gray-200/80">
               <h1 className="text-center mb-8 font-extrabold text-3xl md:text-4xl bg-gradient-to-r from-blue-600 to-violet-500 text-transparent bg-clip-text tracking-tight">
-                Sistema de Consulta Médica Integral
+                SmartClinic AI
               </h1>
               
               <FormSelector selectedType={formType} onSelect={setFormType} />

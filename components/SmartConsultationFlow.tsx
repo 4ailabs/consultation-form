@@ -486,7 +486,7 @@ const SmartConsultationFlow: React.FC<SmartConsultationFlowProps> = ({
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">
-                    Smart Consultation Flow
+                    SmartClinic AI - Smart Flow
                   </h1>
                   <p className="text-sm text-gray-600">
                     Flujo inteligente optimizado para {smartDecision.route}

@@ -1,4 +1,4 @@
-# 🏥 Sistema de Consulta Médica Integral
+# 🏥 SmartClinic AI
 
 Un sistema completo de gestión de consultas médicas con inteligencia artificial, transcripción de audio, y base de datos en tiempo real.
 
@@ -255,4 +255,4 @@ Si tienes problemas:
 
 ---
 
-**¡Disfruta usando el Sistema de Consulta Médica Integral! 🏥✨**
+**¡Disfruta usando SmartClinic AI! 🏥✨**

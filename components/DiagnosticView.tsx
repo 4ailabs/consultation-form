@@ -6,7 +6,7 @@ const DiagnosticView: React.FC = () => {
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            🏥 Sistema de Consulta Médica
+            🏥 SmartClinic AI
           </h1>
           
           <div className="space-y-4 text-left">

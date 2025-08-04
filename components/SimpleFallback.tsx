@@ -8,7 +8,7 @@ const SimpleFallback: React.FC = () => {
       fontFamily: 'Arial, sans-serif',
       textAlign: 'center'
     }}>
-      <h1 style={{ color: '#333' }}>🏥 Sistema de Consulta Médica</h1>
+      <h1 style={{ color: '#333' }}>🏥 SmartClinic AI</h1>
       <p style={{ color: '#666' }}>React está funcionando correctamente</p>
       <div style={{ 
         margin: '20px 0', 
